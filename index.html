@@ -1,728 +1,568 @@
-```react
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Play, Pause, RotateCcw, Volume2, Globe, Search, Sparkles, 
-  BookOpen, ChevronRight, HelpCircle, ArrowRight, Languages, Check, SkipForward
-} from 'lucide-react';
-
-// إعداد مفتاح الـ API لـ Gemini (يتم تعويضه تلقائياً في البيئة)
-const apiKey = "";
-
-// عينات فيديوهات واجدة مع النصوص ديالها باش يبدا المستخدم مباشرة
-const MOCK_VIDEOS = [
-  {
-    id: "frog-song",
-    youtubeId: "WfKWe8MvI6U", // مثال لفيديو تعليمي للأطفال/اليرقات
-    title: "The Happy Frog - Learn English & Darija",
-    language: "English",
-    transcript: [
-      { id: 1, start: 0, end: 4, text: "I jump really high.", translation: "كنقز عالي بزاف.", words: [
-        { word: "I", translation: "أنا", pronunciation: "آي" },
-        { word: "jump", translation: "كنقز / أقفز", pronunciation: "جامب" },
-        { word: "really", translation: "بزاف / حقاً", pronunciation: "ريلي" },
-        { word: "high", translation: "عالي / مرتفع", pronunciation: "هاي" }
-      ]},
-      { id: 2, start: 4, end: 8, text: "But you cannot fly.", translation: "ولكن ما كتقدرش تطير.", words: [
-        { word: "But", translation: "ولكن", pronunciation: "بات" },
-        { word: "you", translation: "أنت", pronunciation: "يو" },
-        { word: "cannot", translation: "ما كتقدرش / لا تستطيع", pronunciation: "كانوت" },
-        { word: "fly", translation: "تطير", pronunciation: "فلاي" }
-      ]},
-      { id: 3, start: 8, end: 11, text: "Hmm. Yes, I can fly.", translation: "همم. إيه، نقدر نطير.", words: [
-        { word: "Hmm", translation: "همم (للتفكير)", pronunciation: "همم" },
-        { word: "Yes", translation: "إيه / نعم", pronunciation: "ييس" },
-        { word: "I", translation: "أنا", pronunciation: "آي" },
-        { word: "can", translation: "نقدر / أستطيع", pronunciation: "كان" },
-        { word: "fly", translation: "نطير", pronunciation: "فلاي" }
-      ]},
-      { id: 4, start: 11, end: 15, text: "Let's make a bet.", translation: "يلاه نديرو رهان (نتكاتبو).", words: [
-        { word: "Let's", translation: "يلاه / دعنا", pronunciation: "لتس" },
-        { word: "make", translation: "نديرو / نصنع", pronunciation: "ميك" },
-        { word: "a", translation: "أداة نكرة", pronunciation: "إي" },
-        { word: "bet", translation: "رهان / تكاتب", pronunciation: "بيت" }
-      ]}
-    ]
-  },
-  {
-    id: "friends-scene",
-    youtubeId: "vN-1_In7XpM",
-    title: "English Conversations - Greetings",
-    language: "English",
-    transcript: [
-      { id: 1, start: 0, end: 3, text: "How are you doing today?", translation: "كيف داير اليوم؟ / كيف حالك اليوم؟", words: [
-        { word: "How", translation: "كيفاش / كيف", pronunciation: "هاو" },
-        { word: "are", translation: "تكون (فعل مساعد)", pronunciation: "آر" },
-        { word: "you", translation: "أنت", pronunciation: "يو" },
-        { word: "doing", translation: "داير / تفعل", pronunciation: "دوينغ" },
-        { word: "today", translation: "اليوم", pronunciation: "توداي" }
-      ]},
-      { id: 2, start: 3, end: 6, text: "I am doing great, thank you.", translation: "أنا بخير بزاف، شكراً ليك.", words: [
-        { word: "I", translation: "أنا", pronunciation: "آي" },
-        { word: "am", translation: "أكون", pronunciation: "أَم" },
-        { word: "doing", translation: "بصحة / حال", pronunciation: "دوينغ" },
-        { word: "great", translation: "رائع / بخير بزاف", pronunciation: "غريت" },
-        { word: "thank", translation: "أشكر", pronunciation: "ثانك" },
-        { word: "you", translation: "أنت", pronunciation: "يو" }
-      ]}
-    ]
-  }
-];
-
-export default function App() {
-  const [youtubeUrl, setYoutubeUrl] = useState("");
-  const [currentVideo, setCurrentVideo] = useState(MOCK_VIDEOS[0]);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [playbackRate, setPlaybackRate] = useState(1);
-  const [activeWord, setActiveWord] = useState(null);
-  const [loopMode, setLoopMode] = useState(false); // تكرار نفس السطر
-  const [activeSentenceId, setActiveSentenceId] = useState(1);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [audioLoading, setAudioLoading] = useState(false);
-
-  const playerRef = useRef(null);
-  const progressInterval = useRef(null);
-
-  // تحميل مكتبة يوتيوب الرسمية للمزامنة الدقيقة
-  useEffect(() => {
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = "https://www.youtube.com/iframe_api";
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    }
-
-    // تهيئة المشغل بمجرد جاهزية المكتبة
-    window.onYouTubeIframeAPIReady = () => {
-      initPlayer(currentVideo.youtubeId);
-    };
-
-    if (window.YT && window.YT.Player) {
-      initPlayer(currentVideo.youtubeId);
-    }
-
-    return () => {
-      clearInterval(progressInterval.current);
-    };
-  }, [currentVideo]);
-
-  const initPlayer = (videoId) => {
-    if (playerRef.current) {
-      try {
-        playerRef.current.destroy();
-      } catch (e) {
-        console.error("Error destroying player:", e);
-      }
-    }
-
-    playerRef.current = new window.YT.Player('youtube-iframe', {
-      videoId: videoId,
-      playerVars: {
-        playsinline: 1,
-        controls: 0, // إخفاء عناصر التحكم الأصلية لتقديم تجربة تعليمية مخصصة
-        disablekb: 1,
-        modestbranding: 1,
-        rel: 0
-      },
-      events: {
-        onReady: (event) => {
-          setIsPlaying(false);
-        },
-        onStateChange: (event) => {
-          // YT.PlayerState.PLAYING = 1
-          if (event.data === 1) {
-            setIsPlaying(true);
-            startTrackingProgress();
-          } else {
-            setIsPlaying(false);
-            clearInterval(progressInterval.current);
-          }
+```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دارجة تيوب • DarjaTube Learner</title>
+    <!-- Tailwind CSS للستايليست -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons للأيقونات -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- خطوط جوجل -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', 'Tajawal', sans-serif;
         }
-      }
-    });
-  };
+    </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500/30 selection:text-emerald-300">
 
-  // تتبع الوقت الفعلي للفيديو ومزامنة النص
-  const startTrackingProgress = () => {
-    clearInterval(progressInterval.current);
-    progressInterval.current = setInterval(() => {
-      if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
-        const time = playerRef.current.getCurrentTime();
-        setCurrentTime(time);
-
-        // البحث عن السطر المقابل للوقت الحالي
-        const currentSentence = currentVideo.transcript.find(
-          s => time >= s.start && time <= s.end
-        );
-
-        if (currentSentence) {
-          setActiveSentenceId(currentSentence.id);
-
-          // وضعية التكرار (Loop Mode): إعادة تشغيل السطر الحالي تكرارياً
-          if (loopMode && time >= currentSentence.end - 0.2) {
-            playerRef.current.seekTo(currentSentence.start);
-          }
-        }
-      }
-    }, 100);
-  };
-
-  // استخراج الـ ID من رابط يوتيوب
-  const extractVideoId = (url) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
-  };
-
-  // دالة الاستدعاء مع معالجة الأخطاء والتكرار (Exponential Backoff)
-  const callGeminiWithRetry = async (payload, retries = 5, delay = 1000) => {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-    
-    for (let i = 0; i < retries; i++) {
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        if (response.ok) return await response.json();
-      } catch (error) {
-        if (i === retries - 1) throw error;
-        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
-      }
-    }
-  };
-
-  // توليد نصوص ذكية وترجمة تفاعلية لأي فيديو يوتيوب عبر Gemini
-  const handleGenerateTranscript = async (e) => {
-    e.preventDefault();
-    const videoId = extractVideoId(youtubeUrl);
-    
-    if (!videoId) {
-      setErrorMessage("عافاك دخل رابط يوتيوب صحيح (مثال: https://www.youtube.com/watch?v=...)");
-      return;
-    }
-
-    setIsGenerating(true);
-    setErrorMessage("");
-    setSuccessMessage("");
-
-    // بناء سياق التوليد للذكاء الاصطناعي للحصول على ملف JSON متناسق
-    const systemPrompt = `You are an expert language teacher and translation tool. 
-    Analyze the requested YouTube video or topic and generate a highly accurate interactive transcript for learning English.
-    Since you are providing transcriptions for language learners, format the response strictly as a JSON object.
-    Ensure that the translations are in Moroccan Darija (الدارجة المغربية) and standard Arabic.
-    The response must strictly match this JSON schema:
-    {
-      "title": "String (Video Title)",
-      "transcript": [
-        {
-          "id": Number (sequential starting from 1),
-          "start": Number (seconds when the sentence starts),
-          "end": Number (seconds when the sentence ends),
-          "text": "String (Clean English sentence)",
-          "translation": "String (Moroccan Darija Translation with Arabic script)",
-          "words": [
-            {
-              "word": "String (English word clean without punctuation)",
-              "translation": "String (Darija/Arabic word translation)",
-              "pronunciation": "String (Phonetic transcription in Arabic letters)"
-            }
-          ]
-        }
-      ]
-    }`;
-
-    const userPrompt = `Please generate an interactive transcript for this YouTube Video ID: ${videoId}. 
-    Provide about 4 to 6 continuous chronological sentences suitable for learning. Give realistic timestamps starting from 0 seconds up to about 30 seconds. Make the translations natural and fun.`;
-
-    const payload = {
-      contents: [{ parts: [{ text: userPrompt }] }],
-      systemInstruction: { parts: [{ text: systemPrompt }] },
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: "OBJECT",
-          properties: {
-            title: { type: "STRING" },
-            transcript: {
-              type: "ARRAY",
-              items: {
-                type: "OBJECT",
-                properties: {
-                  id: { type: "INTEGER" },
-                  start: { type: "NUMBER" },
-                  end: { type: "NUMBER" },
-                  text: { type: "STRING" },
-                  translation: { type: "STRING" },
-                  words: {
-                    type: "ARRAY",
-                    items: {
-                      type: "OBJECT",
-                      properties: {
-                        word: { type: "STRING" },
-                        translation: { type: "STRING" },
-                        pronunciation: { type: "STRING" }
-                      },
-                      required: ["word", "translation", "pronunciation"]
-                    }
-                  }
-                },
-                required: ["id", "start", "end", "text", "translation", "words"]
-              }
-            }
-          },
-          required: ["title", "transcript"]
-        }
-      }
-    };
-
-    try {
-      const data = await callGeminiWithRetry(payload);
-      const generatedContent = JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text);
-      
-      if (generatedContent && generatedContent.transcript) {
-        const newVideo = {
-          id: videoId,
-          youtubeId: videoId,
-          title: generatedContent.title || "فيديو مستورد بواسطة الذكاء الاصطناعي",
-          language: "English",
-          transcript: generatedContent.transcript
-        };
-
-        setCurrentVideo(newVideo);
-        setSuccessMessage("تم توليد النص الذكي والترجمة بنجاح! كليك على الكلمات لتجربتها.");
-        setYoutubeUrl("");
-      } else {
-        throw new Error("تنسيق البيانات غير صحيح");
-      }
-    } catch (err) {
-      setErrorMessage("وقع مشكل فالاتصال بالذكاء الاصطناعي. جرب مرة أخرى.");
-      console.error(err);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  // نطق الكلمة باستعمال محرك نطق الصوت لـ Gemini
-  const speakWord = async (wordText) => {
-    setAudioLoading(true);
-    const textToSay = `Say clearly: ${wordText}`;
-    const payload = {
-      contents: [{ parts: [{ text: textToSay }] }],
-      generationConfig: {
-        responseModalities: ["AUDIO"],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: {
-              voiceName: "Kore" // صوت واضح لتعلم اللغات
-            }
-          }
-        }
-      },
-      model: "gemini-2.5-flash-preview-tts"
-    };
-
-    try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      
-      const result = await response.json();
-      const pcmBase64 = result.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-      
-      if (pcmBase64) {
-        // تحويل الصوت من PCM16 إلى Audio Context للتشغيل المباشر
-        const playWav = (base64Data) => {
-          const binaryString = window.atob(base64Data);
-          const len = binaryString.length;
-          const bytes = new Uint8Array(len);
-          for (let i = 0; i < len; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
-          
-          // دالة تحويل PCM إلى WAV لإمكانية تشغيلها فالمتصفح مباشرة
-          const wavHeader = new ArrayBuffer(44);
-          const view = new DataView(wavHeader);
-          
-          /* Chunk ID "RIFF" */
-          view.setUint32(0, 0x52494646, false);
-          /* Chunk Size */
-          view.setUint32(4, 36 + len, true);
-          /* Format "WAVE" */
-          view.setUint32(8, 0x57415645, false);
-          /* Subchunk1 ID "fmt " */
-          view.setUint32(12, 0x666d7420, false);
-          /* Subchunk1 Size */
-          view.setUint32(16, 16, true);
-          /* Audio Format (1 = PCM) */
-          view.setUint16(20, 1, true);
-          /* Number of Channels (1 = Mono) */
-          view.setUint16(22, 1, true);
-          /* Sample Rate (24000Hz افتراضي لـ Gemini) */
-          view.setUint32(24, 24000, true);
-          /* Byte Rate (SampleRate * NumChannels * BitsPerSample/8) */
-          view.setUint32(28, 24000 * 2, true);
-          /* Block Align (NumChannels * BitsPerSample/8) */
-          view.setUint16(32, 2, true);
-          /* Bits per Sample */
-          view.setUint16(34, 16, true);
-          /* Subchunk2 ID "data" */
-          view.setUint32(36, 0x64617461, false);
-          /* Subchunk2 Size */
-          view.setUint32(40, len, true);
-          
-          const blob = new Blob([wavHeader, bytes], { type: 'audio/wav' });
-          const audioUrl = URL.createObjectURL(blob);
-          const audio = new Audio(audioUrl);
-          audio.play();
-        };
-
-        playWav(pcmBase64);
-      }
-    } catch (err) {
-      console.error("Error playing word sound:", err);
-    } finally {
-      setAudioLoading(false);
-    }
-  };
-
-  // التحكم فالفيديو
-  const togglePlay = () => {
-    if (playerRef.current) {
-      if (isPlaying) {
-        playerRef.current.pauseVideo();
-        setIsPlaying(false);
-      } else {
-        playerRef.current.playVideo();
-        setIsPlaying(true);
-      }
-    }
-  };
-
-  const changeSpeed = (speed) => {
-    setPlaybackRate(speed);
-    if (playerRef.current && typeof playerRef.current.setPlaybackRate === 'function') {
-      playerRef.current.setPlaybackRate(speed);
-    }
-  };
-
-  const seekToSentence = (start) => {
-    if (playerRef.current) {
-      playerRef.current.seekTo(start, true);
-      playerRef.current.playVideo();
-      setIsPlaying(true);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500/30 selection:text-emerald-300">
-      
-      {/* البار العلوي (Header) */}
-      <header className="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50 px-4 py-3">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/30 text-emerald-400 shadow-lg shadow-emerald-500/5">
-              <Languages className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-                دارجة تيوب • DarjaTube Learner
-              </h1>
-              <p className="text-xs text-slate-400 font-medium">تعلم اللغات بنقرة زر وحدة من فيديوهات اليوتيوب</p>
-            </div>
-          </div>
-
-          {/* تبديل الفيديوهات الواجدة بسرعة */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400 font-medium">أمثلة سريعة:</span>
-            {MOCK_VIDEOS.map(v => (
-              <button 
-                key={v.id}
-                onClick={() => setCurrentVideo(v)}
-                className={`text-xs px-3 py-1.5 rounded-lg border transition-all duration-300 ${
-                  currentVideo.id === v.id 
-                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400 font-semibold' 
-                    : 'border-slate-800 hover:border-slate-700 text-slate-300 hover:bg-slate-800/40'
-                }`}
-              >
-                {v.title.split('-')[0]}
-              </button>
-            ))}
-          </div>
-        </div>
-      </header>
-
-      {/* الجزء الرئيسي */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* العمود الأيسر: الإدخال واللاعب */}
-        <section className="lg:col-span-7 flex flex-col gap-6">
-          
-          {/* صندوق جلب رابط يوتيوب جديد */}
-          <div className="bg-slate-900/80 border border-slate-800/60 rounded-2xl p-4 shadow-xl">
-            <h3 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-emerald-400" />
-              أدخل أي رابط يوتيوب لتحليله بالذكاء الاصطناعي:
-            </h3>
-            <form onSubmit={handleGenerateTranscript} className="flex gap-2">
-              <div className="relative flex-1">
-                <input 
-                  type="text" 
-                  value={youtubeUrl}
-                  onChange={(e) => setYoutubeUrl(e.target.value)}
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  className="w-full bg-slate-950/80 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 text-slate-200 placeholder:text-slate-500"
-                />
-              </div>
-              <button 
-                type="submit"
-                disabled={isGenerating}
-                className="bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 disabled:bg-slate-800 text-slate-950 px-5 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shrink-0 shadow-lg shadow-emerald-500/10"
-              >
-                {isGenerating ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
-                    <span>جاري التوليد...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    <span>توليد النص</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* رسائل التنبيه */}
-            {errorMessage && (
-              <div className="mt-3 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-lg">
-                {errorMessage}
-              </div>
-            )}
-            {successMessage && (
-              <div className="mt-3 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs rounded-lg flex items-center gap-2">
-                <Check className="w-4 h-4 shrink-0" />
-                {successMessage}
-              </div>
-            )}
-          </div>
-
-          {/* حاوي مشغل اليوتيوب */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl relative group">
-            {/* الشاشة والمشغل */}
-            <div className="aspect-video bg-black w-full relative">
-              <div id="youtube-iframe" className="w-full h-full"></div>
-            </div>
-
-            {/* لوحة التحكم السفلية تحت الفيديو */}
-            <div className="p-4 bg-slate-950/90 border-t border-slate-800/80 flex items-center justify-between flex-wrap gap-4">
-              
-              {/* التشغيل والتحكم الرئيسي */}
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={togglePlay}
-                  className="w-12 h-12 rounded-full bg-emerald-500 text-slate-950 hover:scale-105 active:scale-95 transition-all flex items-center justify-center shadow-lg shadow-emerald-500/15"
-                >
-                  {isPlaying ? <Pause className="w-5 h-5 fill-slate-950" /> : <Play className="w-5 h-5 fill-slate-950 translate-x-[1px]" />}
-                </button>
-
-                <button 
-                  onClick={() => playerRef.current && playerRef.current.seekTo(0)}
-                  className="p-3 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-xl transition"
-                  title="إعادة من الأول"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* تحكم سرعة المشغل (1x, 1.25x, 1.5x) */}
-              <div className="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-850">
-                {[1, 1.25, 1.5].map((rate) => (
-                  <button
-                    key={rate}
-                    onClick={() => changeSpeed(rate)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      playbackRate === rate 
-                        ? 'bg-emerald-500 text-slate-950' 
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                    }`}
-                  >
-                    {rate}×
-                  </button>
-                ))}
-              </div>
-
-              {/* زر وضع التكرار للسطر الحالي */}
-              <button
-                onClick={() => setLoopMode(!loopMode)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 ${
-                  loopMode 
-                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400' 
-                    : 'border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                }`}
-              >
-                <div className={`w-2 h-2 rounded-full ${loopMode ? 'bg-emerald-400 animate-pulse' : 'bg-slate-600'}`}></div>
-                تكرار السطر الحالي
-              </button>
-            </div>
-          </div>
-
-          {/* بطاقة معلومات الفيديو */}
-          <div className="p-4 bg-slate-900/40 border border-slate-800/50 rounded-2xl flex items-start gap-3">
-            <BookOpen className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-sm font-semibold text-slate-200">{currentVideo.title}</h4>
-              <p className="text-xs text-slate-400 mt-1">كليك على أي كلمة تحت باش تفهم الشرح والنطق ديالها بالدارجة.</p>
-            </div>
-          </div>
-
-        </section>
-
-        {/* العمود الأيمن: النصوص التفاعلية والقواميس */}
-        <section className="lg:col-span-5 flex flex-col gap-6">
-          
-          {/* صندوق الكلمات التفاعلية الفعالة (قاموس حي) */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl relative min-h-[160px] flex flex-col justify-between overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl"></div>
-            
-            {activeWord ? (
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-3 border-b border-slate-800 pb-3">
-                  <div>
-                    <span className="text-xs text-emerald-400 font-bold uppercase tracking-wider">الكلمة المحددة</span>
-                    <h2 className="text-3xl font-extrabold text-white tracking-wide mt-1">{activeWord.word}</h2>
-                  </div>
-                  <button 
-                    onClick={() => speakWord(activeWord.word)}
-                    disabled={audioLoading}
-                    className="p-3 bg-emerald-500 text-slate-950 hover:bg-emerald-400 rounded-xl transition duration-200 disabled:bg-slate-800 flex items-center justify-center group"
-                    title="استمع للنطق"
-                  >
-                    {audioLoading ? (
-                      <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
-                    ) : (
-                      <Volume2 className="w-5 h-5 group-hover:scale-110 transition" />
-                    )}
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mt-3">
-                  <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/50">
-                    <span className="text-[10px] text-slate-400 block mb-1">الترجمة بالدارجة</span>
-                    <span className="text-lg font-bold text-emerald-300">{activeWord.translation}</span>
-                  </div>
-                  <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/50">
-                    <span className="text-[10px] text-slate-400 block mb-1">طريقة النطق بالتقريب</span>
-                    <span className="text-lg font-bold text-teal-300">{activeWord.pronunciation}</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center text-center py-6 text-slate-500 relative z-10 my-auto">
-                <HelpCircle className="w-10 h-10 text-slate-600 mb-2" />
-                <p className="text-sm font-semibold">برك على شي كلمة من النص المكتوب تحت باش تظهر ليك الترجمة والنطق هنايا فالبلاصة.</p>
-              </div>
-            )}
-          </div>
-
-          {/* لوحة النصوص المتزامنة */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex-1 flex flex-col min-h-[350px]">
-            <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2">
-                <Globe className="w-4 h-4 text-emerald-400" />
-                النص التفاعلي المتزامن
-              </h3>
-              <span className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md">
-                {currentVideo.transcript.length} أسطر
-              </span>
-            </div>
-
-            {/* قائمة الأسطر المكتوبة */}
-            <div className="flex flex-col gap-4 overflow-y-auto max-h-[450px] pr-1">
-              {currentVideo.transcript.map((sentence) => {
-                const isActive = activeSentenceId === sentence.id;
-                return (
-                  <div 
-                    key={sentence.id}
-                    className={`p-4 rounded-xl transition-all duration-300 border ${
-                      isActive 
-                        ? 'bg-emerald-950/30 border-emerald-500/40 shadow-md shadow-emerald-500/5' 
-                        : 'bg-slate-950/30 border-slate-850 hover:bg-slate-900/50'
-                    }`}
-                  >
-                    {/* التوقيت وزر القفز */}
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-mono text-slate-500 bg-slate-900 px-2 py-0.5 rounded">
-                        {Math.floor(sentence.start)}s - {Math.floor(sentence.end)}s
-                      </span>
-                      <button 
-                        onClick={() => seekToSentence(sentence.start)}
-                        className={`text-xs flex items-center gap-1 font-semibold ${
-                          isActive ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'
-                        }`}
-                      >
-                        تشغيل هاد المقطع <ChevronRight className="w-3 h-3" />
-                      </button>
-                    </div>
-
-                    {/* النص الإنجليزي مقطع لكلمات تفاعلية */}
-                    <div className="flex flex-wrap gap-1.5 mb-2.5">
-                      {sentence.text.split(" ").map((rawWord, idx) => {
-                        // إزالة علامات الترقيم لعرض نظيف للكلمة
-                        const cleanWord = rawWord.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
-                        const wordObj = sentence.words.find(
-                          w => w.word.toLowerCase() === cleanWord.toLowerCase()
-                        ) || { word: cleanWord, translation: "غير متوفرة", pronunciation: "" };
-
-                        const isWordActive = activeWord && activeWord.word.toLowerCase() === cleanWord.toLowerCase();
-
-                        return (
-                          <button
-                            key={idx}
-                            onClick={() => setActiveWord(wordObj)}
-                            className={`px-2 py-1 rounded-md text-base md:text-lg font-medium transition-all ${
-                              isWordActive 
-                                ? 'bg-emerald-400 text-slate-950 font-bold scale-105 shadow-md shadow-emerald-400/20' 
-                                : isActive 
-                                  ? 'hover:bg-emerald-500/20 text-white font-semibold' 
-                                  : 'hover:bg-slate-800 text-slate-300'
-                            }`}
-                          >
-                            {rawWord}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* الترجمة العربية/الدارجة الكاملة تحت السطر */}
-                    <p className={`text-sm leading-relaxed border-t border-slate-800/50 pt-2 text-right ${
-                      isActive ? 'text-emerald-300 font-medium' : 'text-slate-400'
-                    }`}>
-                      {sentence.translation}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-        </section>
-
-      </main>
-
-      {/* الفوتر */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
-        <p className="max-w-md mx-auto leading-relaxed">
-          تم التطوير بالكامل لدعم التعلم التفاعلي للغات. يمكنك نسخ أي رابط من يوتيوب لتعلم المفردات مباشرة عبر الذكاء الاصطناعي.
-        </p>
-      </footer>
+    <div id="app" class="flex flex-col min-h-screen">
+        <!-- سيتم بناء واجهة التطبيق هنا ديناميكياً بواسطة JavaScript -->
     </div>
-  );
-}
+
+    <!-- كود التشغيل الرئيسي بالتفصيل -->
+    <script>
+        // إعدادات المفتاح (يمكنك وضعه هنا ليشتغل التوليد بالذكاء الاصطناعي)
+        const apiKey = ""; 
+
+        // البيانات الافتراضية للفيديوهات
+        const MOCK_VIDEOS = [
+          {
+            id: "frog-song",
+            youtubeId: "WfKWe8MvI6U",
+            title: "The Happy Frog - Learn English & Darija",
+            language: "English",
+            transcript: [
+              { id: 1, start: 0, end: 4, text: "I jump really high.", translation: "كنقز عالي بزاف.", words: [
+                { word: "I", translation: "أنا", pronunciation: "آي" },
+                { word: "jump", translation: "كنقز / أقفز", pronunciation: "جامب" },
+                { word: "really", translation: "بزاف / حقاً", pronunciation: "ريلي" },
+                { word: "high", translation: "عالي / مرتفع", pronunciation: "هاي" }
+              ]},
+              { id: 2, start: 4, end: 8, text: "But you cannot fly.", translation: "ولكن ما كتقدرش تطير.", words: [
+                { word: "But", translation: "ولكن", pronunciation: "بات" },
+                { word: "you", translation: "أنت", pronunciation: "يو" },
+                { word: "cannot", translation: "ما كتقدرش", pronunciation: "كانوت" },
+                { word: "fly", translation: "تطير", pronunciation: "فلاي" }
+              ]},
+              { id: 3, start: 8, end: 11, text: "Hmm. Yes, I can fly.", translation: "همم. إيه، نقدر نطير.", words: [
+                { word: "Hmm", translation: "همم (للتفكير)", pronunciation: "همم" },
+                { word: "Yes", translation: "إيه / نعم", pronunciation: "ييس" },
+                { word: "I", translation: "أنا", pronunciation: "آي" },
+                { word: "can", translation: "نقدر / أستطيع", pronunciation: "كان" },
+                { word: "fly", translation: "نطير", pronunciation: "فلاي" }
+              ]},
+              { id: 4, start: 11, end: 15, text: "Let's make a bet.", translation: "يلاه نديرو رهان.", words: [
+                { word: "Let's", translation: "يلاه / دعنا", pronunciation: "لتس" },
+                { word: "make", translation: "نديرو", pronunciation: "ميك" },
+                { word: "a", translation: "أداة نكرة", pronunciation: "إي" },
+                { word: "bet", translation: "رهان", pronunciation: "بيت" }
+              ]}
+            ]
+          },
+          {
+            id: "friends-scene",
+            youtubeId: "vN-1_In7XpM",
+            title: "English Conversations - Greetings",
+            language: "English",
+            transcript: [
+              { id: 1, start: 0, end: 3, text: "How are you doing today?", translation: "كيف داير اليوم؟", words: [
+                { word: "How", translation: "كيفاش", pronunciation: "هاو" },
+                { word: "are", translation: "تكون", pronunciation: "آر" },
+                { word: "you", translation: "أنت", pronunciation: "يو" },
+                { word: "doing", translation: "داير", pronunciation: "دوينغ" },
+                { word: "today", translation: "اليوم", pronunciation: "توداي" }
+              ]},
+              { id: 2, start: 3, end: 6, text: "I am doing great, thank you.", translation: "أنا بخير بزاف، شكراً ليك.", words: [
+                { word: "I", translation: "أنا", pronunciation: "آي" },
+                { word: "am", translation: "أكون", pronunciation: "أَم" },
+                { word: "doing", translation: "بصحة", pronunciation: "دوينغ" },
+                { word: "great", translation: "رائع", pronunciation: "غريت" },
+                { word: "thank", translation: "أشكر", pronunciation: "ثانك" },
+                { word: "you", translation: "أنت", pronunciation: "يو" }
+              ]}
+            ]
+          }
+        ];
+
+        // حالة التطبيق الراهنة (State)
+        let currentVideo = MOCK_VIDEOS[0];
+        let currentTime = 0;
+        let isPlaying = false;
+        let playbackRate = 1;
+        let activeWord = null;
+        let loopMode = false;
+        let activeSentenceId = 1;
+        let isGenerating = false;
+        let player = null;
+        let progressInterval = null;
+
+        // تحميل مكتبة اليوتيوب
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        window.onYouTubeIframeAPIReady = () => {
+            initPlayer(currentVideo.youtubeId);
+        };
+
+        function initPlayer(videoId) {
+            if (player) {
+                try { player.destroy(); } catch(e) {}
+            }
+            player = new YT.Player('youtube-iframe', {
+                videoId: videoId,
+                playerVars: {
+                    playsinline: 1,
+                    controls: 0,
+                    disablekb: 1,
+                    modestbranding: 1,
+                    rel: 0
+                },
+                events: {
+                    onReady: () => {
+                        isPlaying = false;
+                        updateControlsUI();
+                    },
+                    onStateChange: (event) => {
+                        if (event.data === YT.PlayerState.PLAYING) {
+                            isPlaying = true;
+                            startTracking();
+                        } else {
+                            isPlaying = false;
+                            clearInterval(progressInterval);
+                        }
+                        updateControlsUI();
+                    }
+                }
+            });
+        }
+
+        function startTracking() {
+            clearInterval(progressInterval);
+            progressInterval = setInterval(() => {
+                if (player && typeof player.getCurrentTime === 'function') {
+                    const time = player.getCurrentTime();
+                    currentTime = time;
+                    
+                    const currentSentence = currentVideo.transcript.find(s => time >= s.start && time <= s.end);
+                    if (currentSentence) {
+                        activeSentenceId = currentSentence.id;
+                        highlightSentence(currentSentence.id);
+                        
+                        if (loopMode && time >= currentSentence.end - 0.2) {
+                            player.seekTo(currentSentence.start);
+                        }
+                    }
+                }
+            }, 100);
+        }
+
+        // بناء وتحديث واجهة المستخدم الرئيسية
+        function renderApp() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <!-- البار العلوي -->
+                <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50 px-4 py-3">
+                    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/30 text-emerald-400 shadow-lg shadow-emerald-500/5">
+                                <i data-lucide="languages" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+                                    دارجة تيوب • DarjaTube Learner
+                                </h1>
+                                <p class="text-xs text-slate-400 font-medium text-right">تعلم اللغات بنقرة زر وحدة من فيديوهات اليوتيوب</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-400 font-medium">أمثلة:</span>
+                            ${MOCK_VIDEOS.map(v => `
+                                <button onclick="selectVideo('${v.id}')" class="text-xs px-3 py-1.5 rounded-lg border transition-all duration-300 ${currentVideo.id === v.id ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400 font-semibold' : 'border-slate-800 hover:border-slate-700 text-slate-300'}">
+                                    ${v.title.split('-')[0]}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                </header>
+
+                <!-- المحتوى الرئيسي -->
+                <main class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    
+                    <!-- اليسار: الإدخال واللاعب -->
+                    <section class="lg:col-span-7 flex flex-col gap-6">
+                        
+                        <!-- صندوق الرابط -->
+                        <div class="bg-slate-900/80 border border-slate-800/60 rounded-2xl p-4 shadow-xl">
+                            <h3 class="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-emerald-400"></i>
+                                أدخل رابط فيديو يوتيوب لتحليله بالذكاء الاصطناعي:
+                            </h3>
+                            <div class="flex gap-2">
+                                <input type="text" id="yt-url" placeholder="https://www.youtube.com/watch?v=..." class="flex-1 bg-slate-950/80 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 text-slate-200 placeholder:text-slate-500 text-left" dir="ltr" />
+                                <button onclick="generateTranscript()" id="gen-btn" class="bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-slate-950 px-5 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shrink-0">
+                                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                    <span>تحليل النص</span>
+                                </button>
+                            </div>
+                            <div id="status-msg" class="mt-2 hidden text-xs p-3 rounded-lg"></div>
+                        </div>
+
+                        <!-- المشغل -->
+                        <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl relative">
+                            <div class="aspect-video bg-black w-full relative">
+                                <div id="youtube-iframe" class="w-full h-full"></div>
+                            </div>
+                            <div class="p-4 bg-slate-950/90 border-t border-slate-800/80 flex items-center justify-between flex-wrap gap-4">
+                                <div class="flex items-center gap-2">
+                                    <button id="play-btn" onclick="togglePlay()" class="w-12 h-12 rounded-full bg-emerald-500 text-slate-950 hover:scale-105 active:scale-95 transition-all flex items-center justify-center">
+                                        <i data-lucide="play" class="w-5 h-5 fill-slate-950"></i>
+                                    </button>
+                                    <button onclick="player.seekTo(0)" class="p-3 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-xl transition">
+                                        <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+
+                                <div class="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-850">
+                                    <button onclick="setRate(1)" class="rate-btn px-3 py-1.5 rounded-lg text-xs font-bold transition ${playbackRate === 1 ? 'bg-emerald-500 text-slate-950' : 'text-slate-400'}">1×</button>
+                                    <button onclick="setRate(1.25)" class="rate-btn px-3 py-1.5 rounded-lg text-xs font-bold transition ${playbackRate === 1.25 ? 'bg-emerald-500 text-slate-950' : 'text-slate-400'}">1.25×</button>
+                                    <button onclick="setRate(1.5)" class="rate-btn px-3 py-1.5 rounded-lg text-xs font-bold transition ${playbackRate === 1.5 ? 'bg-emerald-500 text-slate-950' : 'text-slate-400'}">1.5×</button>
+                                </div>
+
+                                <button onclick="toggleLoop()" id="loop-btn" class="px-4 py-2 rounded-xl text-xs font-bold border border-slate-800 text-slate-400 hover:bg-slate-800 flex items-center gap-2">
+                                    <span id="loop-dot" class="w-2 h-2 rounded-full bg-slate-600"></span>
+                                    تكرار السطر الحالي
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- اليمين: الترجمة والكلمات التفاعلية -->
+                    <section class="lg:col-span-5 flex flex-col gap-6">
+                        <!-- صندوق تفاصيل الكلمة المحددة -->
+                        <div id="word-details" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl min-h-[160px] flex flex-col justify-center">
+                            <div class="text-center text-slate-500 py-4 flex flex-col items-center">
+                                <i data-lucide="help-circle" class="w-10 h-10 text-slate-600 mb-2"></i>
+                                <p class="text-sm">برك على شي كلمة من النص التفاعلي التحت باش تبان الترجمة والنطق هنا.</p>
+                            </div>
+                        </div>
+
+                        <!-- قائمة السطور الكاملة -->
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col flex-1">
+                            <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+                                <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                                    <i data-lucide="globe" class="w-4 h-4 text-emerald-400"></i>
+                                    النص التفاعلي المتزامن
+                                </h3>
+                            </div>
+                            <div id="transcript-list" class="flex flex-col gap-4 overflow-y-auto max-h-[400px]">
+                                <!-- سيتم ملؤه ديناميكياً -->
+                            </div>
+                        </div>
+                    </section>
+                </main>
+            `;
+            lucide.createIcons();
+            renderTranscript();
+        }
+
+        // ريندر النصوص التفاعلية
+        function renderTranscript() {
+            const list = document.getElementById('transcript-list');
+            if (!list) return;
+
+            list.innerHTML = currentVideo.transcript.map(sentence => {
+                const isActive = activeSentenceId === sentence.id;
+                
+                // تقسيم الكلمات لأزرار تفاعلية
+                const wordsHTML = sentence.text.split(" ").map(rawWord => {
+                    const cleanWord = rawWord.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
+                    const wordObj = sentence.words.find(w => w.word.toLowerCase() === cleanWord.toLowerCase()) || { word: cleanWord, translation: "غير متوفرة", pronunciation: "" };
+                    
+                    return `
+                        <button onclick='selectWord(${JSON.stringify(wordObj).replace(/'/g, "&apos;")})' class="px-2 py-1 rounded-md text-base md:text-lg font-medium hover:bg-emerald-500/20 text-slate-300 transition-all duration-150">
+                            ${rawWord}
+                        </button>
+                    `;
+                }).join('');
+
+                return `
+                    <div id="sentence-${sentence.id}" class="sentence-box p-4 rounded-xl transition-all duration-300 border ${isActive ? 'bg-emerald-950/30 border-emerald-500/40 shadow-emerald-500/5' : 'bg-slate-950/30 border-slate-850'}">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-mono text-slate-500">${Math.floor(sentence.start)}s - ${Math.floor(sentence.end)}s</span>
+                            <button onclick="seekTo(${sentence.start})" class="text-xs text-emerald-400 flex items-center gap-1 font-semibold">
+                                تشغيل هاد المقطع <i data-lucide="chevron-left" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5 mb-2.5">
+                            ${wordsHTML}
+                        </div>
+                        <p class="text-sm leading-relaxed border-t border-slate-800/50 pt-2 text-right ${isActive ? 'text-emerald-300 font-medium' : 'text-slate-400'}">
+                            ${sentence.translation}
+                        </p>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function highlightSentence(id) {
+            document.querySelectorAll('.sentence-box').forEach(box => {
+                box.classList.remove('bg-emerald-950/30', 'border-emerald-500/40');
+                box.classList.add('bg-slate-950/30', 'border-slate-850');
+            });
+            const activeBox = document.getElementById(`sentence-${id}`);
+            if (activeBox) {
+                activeBox.classList.add('bg-emerald-950/30', 'border-emerald-500/40');
+                activeBox.classList.remove('bg-slate-950/30', 'border-slate-850');
+            }
+        }
+
+        function selectVideo(id) {
+            const v = MOCK_VIDEOS.find(video => video.id === id);
+            if (v) {
+                currentVideo = v;
+                renderApp();
+                initPlayer(v.youtubeId);
+            }
+        }
+
+        function togglePlay() {
+            if (!player) return;
+            if (isPlaying) {
+                player.pauseVideo();
+            } else {
+                player.playVideo();
+            }
+        }
+
+        function updateControlsUI() {
+            const btn = document.getElementById('play-btn');
+            if (btn) {
+                btn.innerHTML = isPlaying 
+                    ? '<i data-lucide="pause" class="w-5 h-5 fill-slate-950"></i>' 
+                    : '<i data-lucide="play" class="w-5 h-5 fill-slate-950"></i>';
+                lucide.createIcons();
+            }
+        }
+
+        function setRate(rate) {
+            playbackRate = rate;
+            if (player && typeof player.setPlaybackRate === 'function') {
+                player.setPlaybackRate(rate);
+            }
+            document.querySelectorAll('.rate-btn').forEach(b => {
+                b.classList.remove('bg-emerald-500', 'text-slate-950');
+                b.classList.add('text-slate-400');
+            });
+            event.target.classList.add('bg-emerald-500', 'text-slate-950');
+        }
+
+        function toggleLoop() {
+            loopMode = !loopMode;
+            const dot = document.getElementById('loop-dot');
+            const btn = document.getElementById('loop-btn');
+            if (loopMode) {
+                dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+                btn.className = "px-4 py-2 rounded-xl text-xs font-bold border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 flex items-center gap-2";
+            } else {
+                dot.className = "w-2 h-2 rounded-full bg-slate-600";
+                btn.className = "px-4 py-2 rounded-xl text-xs font-bold border border-slate-800 text-slate-400 hover:bg-slate-800 flex items-center gap-2";
+            }
+        }
+
+        function seekTo(time) {
+            if (player) {
+                player.seekTo(time, true);
+                player.playVideo();
+            }
+        }
+
+        function selectWord(wordObj) {
+            activeWord = wordObj;
+            const box = document.getElementById('word-details');
+            box.innerHTML = `
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-3">
+                        <div>
+                            <span class="text-xs text-emerald-400 font-bold uppercase">الكلمة المحددة</span>
+                            <h2 class="text-3xl font-extrabold text-white tracking-wide mt-1">${wordObj.word}</h2>
+                        </div>
+                        <button onclick="speakWord('${wordObj.word}')" id="speak-btn" class="p-3 bg-emerald-500 text-slate-950 hover:bg-emerald-400 rounded-xl transition flex items-center justify-center">
+                            <i data-lucide="volume-2" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-3">
+                        <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/50">
+                            <span class="text-[10px] text-slate-400 block mb-1">الترجمة بالدارجة</span>
+                            <span class="text-lg font-bold text-emerald-300">${wordObj.translation}</span>
+                        </div>
+                        <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/50">
+                            <span class="text-[10px] text-slate-400 block mb-1">النطق بالتقريب</span>
+                            <span class="text-lg font-bold text-teal-300">${wordObj.pronunciation}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // نطق الكلمة باستعمال Gemini TTS
+        async function speakWord(text) {
+            const btn = document.getElementById('speak-btn');
+            btn.innerHTML = `<div class="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: `Say clearly: ${text}` }] }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: "Kore" }
+                        }
+                    }
+                },
+                model: "gemini-2.5-flash-preview-tts"
+            };
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                const base64 = result.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+                
+                if (base64) {
+                    playWavFromPCM(base64);
+                }
+            } catch (err) {
+                console.error("Error with voice output:", err);
+            } finally {
+                btn.innerHTML = `<i data-lucide="volume-2" class="w-5 h-5"></i>`;
+                lucide.createIcons();
+            }
+        }
+
+        function playWavFromPCM(base64Data) {
+            const binaryString = window.atob(base64Data);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            const wavHeader = new ArrayBuffer(44);
+            const view = new DataView(wavHeader);
+            view.setUint32(0, 0x52494646, false);
+            view.setUint32(4, 36 + len, true);
+            view.setUint32(8, 0x57415645, false);
+            view.setUint32(12, 0x666d7420, false);
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, 24000, true);
+            view.setUint32(28, 24000 * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            view.setUint32(36, 0x64617461, false);
+            view.setUint32(40, len, true);
+            
+            const blob = new Blob([wavHeader, bytes], { type: 'audio/wav' });
+            const audioUrl = URL.createObjectURL(blob);
+            new Audio(audioUrl).play();
+        }
+
+        // استخراج كود الفيديو
+        function extractId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        // توليد النص باستدعاء الذكاء الاصطناعي
+        async function generateTranscript() {
+            const urlInput = document.getElementById('yt-url').value;
+            const videoId = extractId(urlInput);
+            const msg = document.getElementById('status-msg');
+            const btn = document.getElementById('gen-btn');
+
+            if (!videoId) {
+                msg.className = "mt-2 text-xs p-3 rounded-lg bg-rose-500/10 text-rose-400 block";
+                msg.innerHTML = "عافاك دخل رابط يوتيوب صحيح.";
+                return;
+            }
+
+            msg.className = "mt-2 text-xs p-3 rounded-lg bg-emerald-500/10 text-emerald-400 block";
+            msg.innerHTML = "جاري الاتصال والتحليل بالذكاء الاصطناعي...";
+            btn.disabled = true;
+
+            const systemPrompt = `You are an expert language teacher. Transcribe this YouTube video to learn English. Output STRICTLY a JSON object matching this schema:
+            {
+              "title": "String",
+              "transcript": [
+                {
+                  "id": 1,
+                  "start": 0,
+                  "end": 4,
+                  "text": "Clean English Sentence",
+                  "translation": "Moroccan Darija translation",
+                  "words": [{"word": "word", "translation": "Darija translation", "pronunciation": "Pronunciation in Arabic letters"}]
+                }
+              ]
+            }`;
+
+            const userPrompt = `Generate a 4-sentence transcript for Video ID: ${videoId}. Ensure the timelines start from 0 to 20 seconds.`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: userPrompt }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
+                });
+                
+                const data = await response.json();
+                const content = JSON.parse(data.candidates[0].content.parts[0].text);
+
+                if (content && content.transcript) {
+                    currentVideo = {
+                        id: videoId,
+                        youtubeId: videoId,
+                        title: content.title || "تم الاستيراد بنجاح",
+                        language: "English",
+                        transcript: content.transcript
+                    };
+                    renderApp();
+                    initPlayer(videoId);
+                    msg.innerHTML = "تم جلب النص بنجاح!";
+                }
+            } catch(e) {
+                msg.className = "mt-2 text-xs p-3 rounded-lg bg-rose-500/10 text-rose-400 block";
+                msg.innerHTML = "وقع خطأ فالتوليد. يرجى التأكد من الـ API Key وإعادة المحاولة.";
+                console.error(e);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // التشغيل الأولي
+        window.onload = () => {
+            renderApp();
+        };
+    </script>
+</body>
+</html>
 
 ```
