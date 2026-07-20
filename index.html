@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منشئ السير الذاتية الاحترافي</title>
+    <title>منشئ السير الذاتية - قالب إبداعي</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -34,59 +34,10 @@
 
         .a4-paper { width: 210mm; min-height: 297mm; background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.15); margin: 0 auto; position: relative; overflow: hidden; }
 
-        /* Template 1: Modern Split */
-        .template-modern-split { display: flex; min-height: 297mm; }
-        .template-modern-split .sidebar { width: 35%; background: linear-gradient(180deg, #1e3a5f 0%, #2d5a87 100%); color: white; padding: 30px 20px; }
-        .template-modern-split .main-content { width: 65%; padding: 30px 25px; background: white; }
-        .template-modern-split .photo-container { width: 120px; height: 120px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); overflow: hidden; margin: 0 auto 20px; }
-        .template-modern-split .photo-container img { width: 100%; height: 100%; object-fit: cover; }
-        .template-modern-split .name { font-size: 22px; font-weight: 800; text-align: center; margin-bottom: 5px; }
-        .template-modern-split .job-title { font-size: 14px; text-align: center; opacity: 0.9; margin-bottom: 25px; }
-        .template-modern-split .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid rgba(255,255,255,0.3); }
-        .template-modern-split .contact-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 12px; }
-        .template-modern-split .contact-item i { width: 20px; text-align: center; }
-        .template-modern-split .skill-tag { display: inline-block; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 15px; font-size: 11px; margin: 3px; }
-        .template-modern-split .language-item { margin-bottom: 10px; }
-        .template-modern-split .language-name { font-size: 12px; margin-bottom: 4px; }
-        .template-modern-split .progress-bar { height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; overflow: hidden; }
-        .template-modern-split .progress-fill { height: 100%; background: white; border-radius: 3px; }
-        .template-modern-split .main-section-title { font-size: 16px; font-weight: 700; color: #1e3a5f; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #1e3a5f; display: flex; align-items: center; gap: 10px; }
-        .template-modern-split .main-section-title i { font-size: 14px; }
-        .template-modern-split .experience-item { margin-bottom: 18px; position: relative; padding-right: 20px; border-right: 2px solid #e5e7eb; }
-        .template-modern-split .experience-item::before { content: ''; position: absolute; right: -6px; top: 0; width: 10px; height: 10px; background: #1e3a5f; border-radius: 50%; }
-        .template-modern-split .exp-title { font-weight: 700; font-size: 14px; color: #1e3a5f; }
-        .template-modern-split .exp-company { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
-        .template-modern-split .exp-date { font-size: 11px; color: #9ca3af; margin-bottom: 6px; }
-        .template-modern-split .exp-desc { font-size: 12px; color: #4b5563; line-height: 1.6; }
-
-        /* Template 2: Elegant */
-        .template-elegant { padding: 40px 35px; background: white; }
-        .template-elegant .header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px double #1e3a5f; }
-        .template-elegant .name { font-size: 32px; font-weight: 800; color: #1e3a5f; letter-spacing: 2px; margin-bottom: 8px; }
-        .template-elegant .job-title { font-size: 16px; color: #6b7280; font-weight: 500; }
-        .template-elegant .contact-row { display: flex; justify-content: center; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
-        .template-elegant .contact-item { font-size: 12px; color: #4b5563; display: flex; align-items: center; gap: 5px; }
-        .template-elegant .two-column { display: flex; gap: 30px; }
-        .template-elegant .left-col { width: 30%; }
-        .template-elegant .right-col { width: 70%; }
-        .template-elegant .section-title { font-size: 14px; font-weight: 700; color: #1e3a5f; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid #1e3a5f; }
-        .template-elegant .skill-item { margin-bottom: 12px; }
-        .template-elegant .skill-name { font-size: 12px; margin-bottom: 4px; color: #374151; }
-        .template-elegant .skill-bar { height: 5px; background: #e5e7eb; border-radius: 3px; }
-        .template-elegant .skill-fill { height: 100%; background: #1e3a5f; border-radius: 3px; }
-        .template-elegant .experience-item { margin-bottom: 20px; }
-        .template-elegant .exp-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
-        .template-elegant .exp-title { font-weight: 700; font-size: 14px; color: #1e3a5f; }
-        .template-elegant .exp-date { font-size: 11px; color: #9ca3af; font-style: italic; }
-        .template-elegant .exp-company { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
-        .template-elegant .exp-desc { font-size: 12px; color: #4b5563; line-height: 1.7; }
-
-        /* Template 3: Creative */
+        /* Template: Creative */
         .template-creative { display: flex; min-height: 297mm; }
         .template-creative .left-panel { width: 32%; background: #2c3e50; color: white; padding: 35px 25px; position: relative; }
         .template-creative .left-panel::before { content: ''; position: absolute; top: 0; right: 0; width: 100%; height: 200px; background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%); opacity: 0.3; }
-        .template-creative .photo-container { width: 130px; height: 130px; border-radius: 50%; border: 5px solid rgba(255,255,255,0.2); overflow: hidden; margin: 0 auto 25px; position: relative; z-index: 1; }
-        .template-creative .photo-container img { width: 100%; height: 100%; object-fit: cover; }
         .template-creative .name { font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 5px; position: relative; z-index: 1; }
         .template-creative .job-title { font-size: 13px; text-align: center; opacity: 0.85; margin-bottom: 30px; position: relative; z-index: 1; }
         .template-creative .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.2); }
@@ -102,67 +53,6 @@
         .template-creative .exp-company { font-size: 12px; color: #7f8c8d; margin-bottom: 8px; }
         .template-creative .exp-desc { font-size: 12px; color: #555; line-height: 1.7; }
 
-        /* Template 4: Professional */
-        .template-professional { padding: 35px 40px; background: white; }
-        .template-professional .header { display: flex; align-items: center; gap: 25px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #1e3a5f; }
-        .template-professional .photo-container { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #1e3a5f; overflow: hidden; flex-shrink: 0; }
-        .template-professional .photo-container img { width: 100%; height: 100%; object-fit: cover; }
-        .template-professional .header-info { flex: 1; }
-        .template-professional .name { font-size: 28px; font-weight: 800; color: #1e3a5f; margin-bottom: 5px; }
-        .template-professional .job-title { font-size: 15px; color: #6b7280; margin-bottom: 10px; }
-        .template-professional .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 20px; }
-        .template-professional .contact-item { font-size: 11px; color: #4b5563; display: flex; align-items: center; gap: 6px; }
-        .template-professional .contact-item i { color: #1e3a5f; font-size: 10px; }
-        .template-professional .summary { background: #f8fafc; padding: 15px 20px; border-right: 4px solid #1e3a5f; margin-bottom: 25px; font-size: 13px; line-height: 1.8; color: #4b5563; }
-        .template-professional .section-title { font-size: 15px; font-weight: 700; color: #1e3a5f; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 10px; }
-        .template-professional .section-title i { font-size: 14px; }
-        .template-professional .experience-item { margin-bottom: 18px; display: grid; grid-template-columns: 130px 1fr; gap: 15px; }
-        .template-professional .exp-date { font-size: 11px; color: #6b7280; font-weight: 500; }
-        .template-professional .exp-title { font-weight: 700; font-size: 14px; color: #1e3a5f; margin-bottom: 3px; }
-        .template-professional .exp-company { font-size: 12px; color: #6b7280; margin-bottom: 5px; }
-        .template-professional .exp-desc { font-size: 12px; color: #4b5563; line-height: 1.6; }
-        .template-professional .skills-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-        .template-professional .skill-tag { background: #1e3a5f; color: white; padding: 5px 14px; border-radius: 20px; font-size: 11px; }
-
-        /* Template 5: Timeline */
-        .template-timeline { padding: 35px; background: white; }
-        .template-timeline .header { text-align: center; margin-bottom: 30px; }
-        .template-timeline .photo-container { width: 110px; height: 110px; border-radius: 50%; border: 4px solid #e74c3c; overflow: hidden; margin: 0 auto 15px; }
-        .template-timeline .photo-container img { width: 100%; height: 100%; object-fit: cover; }
-        .template-timeline .name { font-size: 26px; font-weight: 800; color: #2c3e50; margin-bottom: 5px; }
-        .template-timeline .job-title { font-size: 14px; color: #e74c3c; font-weight: 600; margin-bottom: 15px; }
-        .template-timeline .contact-row { display: flex; justify-content: center; gap: 25px; flex-wrap: wrap; }
-        .template-timeline .contact-item { font-size: 12px; color: #7f8c8d; }
-        .template-timeline .section-title { font-size: 16px; font-weight: 700; color: #2c3e50; margin-bottom: 20px; text-align: center; position: relative; }
-        .template-timeline .section-title::after { content: ''; display: block; width: 50px; height: 3px; background: #e74c3c; margin: 8px auto 0; }
-        .template-timeline .timeline { position: relative; padding-right: 30px; }
-        .template-timeline .timeline::before { content: ''; position: absolute; right: 8px; top: 0; bottom: 0; width: 2px; background: #e5e7eb; }
-        .template-timeline .timeline-item { position: relative; margin-bottom: 25px; padding-right: 25px; }
-        .template-timeline .timeline-item::before { content: ''; position: absolute; right: -26px; top: 5px; width: 14px; height: 14px; background: #e74c3c; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px #e74c3c; }
-        .template-timeline .exp-date { font-size: 12px; color: #e74c3c; font-weight: 600; margin-bottom: 5px; }
-        .template-timeline .exp-title { font-weight: 700; font-size: 15px; color: #2c3e50; margin-bottom: 3px; }
-        .template-timeline .exp-company { font-size: 13px; color: #7f8c8d; margin-bottom: 8px; }
-        .template-timeline .exp-desc { font-size: 12px; color: #555; line-height: 1.7; }
-
-        /* Template 6: Minimal */
-        .template-minimal { padding: 45px 40px; background: white; }
-        .template-minimal .header { margin-bottom: 35px; }
-        .template-minimal .name { font-size: 36px; font-weight: 300; color: #1a1a1a; letter-spacing: 3px; margin-bottom: 8px; }
-        .template-minimal .job-title { font-size: 14px; color: #666; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
-        .template-minimal .contact-row { display: flex; gap: 20px; flex-wrap: wrap; font-size: 12px; color: #888; }
-        .template-minimal .contact-item { display: flex; align-items: center; gap: 6px; }
-        .template-minimal .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: #1a1a1a; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid #e0e0e0; }
-        .template-minimal .experience-item { margin-bottom: 22px; }
-        .template-minimal .exp-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-        .template-minimal .exp-title { font-weight: 600; font-size: 14px; color: #1a1a1a; }
-        .template-minimal .exp-date { font-size: 11px; color: #999; }
-        .template-minimal .exp-company { font-size: 12px; color: #666; margin-bottom: 6px; }
-        .template-minimal .exp-desc { font-size: 12px; color: #555; line-height: 1.8; }
-        .template-minimal .skills-list { display: flex; flex-wrap: wrap; gap: 10px; }
-        .template-minimal .skill-item { font-size: 12px; color: #555; padding: 4px 0; }
-        .template-minimal .skill-item::after { content: '•'; margin-right: 10px; margin-left: 10px; color: #ccc; }
-        .template-minimal .skill-item:last-child::after { content: none; }
-
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
@@ -177,26 +67,13 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.4s ease-out; }
-
-        .template-card { transition: all 0.3s ease; cursor: pointer; }
-        .template-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
-        .template-card.active { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
-
-        .preview-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0; transition: all 0.3s ease; z-index: 10; }
-        .template-card:hover .preview-btn { opacity: 1; }
-        .template-card:hover .template-preview-img { filter: brightness(0.7); }
-
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-content { background: white; border-radius: 16px; max-width: 90vw; max-height: 90vh; overflow: auto; position: relative; }
-        .modal-close { position: absolute; top: 15px; left: 15px; width: 36px; height: 36px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-        .modal-close:hover { background: rgba(0,0,0,0.7); }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-slate-900">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, createContext, useContext } = React;
+        const { useState, useEffect, createContext, useContext } = React;
         const { motion, AnimatePresence } = window.Motion;
 
         const AppContext = createContext();
@@ -213,8 +90,7 @@
                 country: 'المغرب',
                 linkedin: 'linkedin.com/in/ahmedalami',
                 website: 'ahmedalami.dev',
-                summary: 'مهندس برمجيات ذو خبرة 5 سنوات في تطوير تطبيقات الويب والموبايل. متخصص في React و Node.js مع شغف كبير لتجربة المستخدم وتصميم الواجهات.',
-                photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face'
+                summary: 'مهندس برمجيات ذو خبرة 5 سنوات في تطوير تطبيقات الويب والموبايل. متخصص في React و Node.js مع شغف كبير لتجربة المستخدم وتصميم الواجهات.'
             },
             sections: {
                 experience: [
@@ -258,8 +134,8 @@
                 ]
             },
             settings: {
-                template: 'modern-split',
-                color: '#1e3a5f',
+                template: 'creative',
+                color: '#2c3e50',
                 font: 'tajawal',
                 fontSize: 'medium',
                 spacing: 'normal',
@@ -267,16 +143,7 @@
             }
         };
 
-        const TEMPLATES = [
-            { id: 'modern-split', name: 'عصري جانبي', category: 'professional', description: 'تصميم جانبي أنيق مع شريط جانبي ملون' },
-            { id: 'elegant', name: 'أنيق كلاسيكي', category: 'classic', description: 'تصميم كلاسيكي أنيق مع ترتيب عمودي' },
-            { id: 'creative', name: 'إبداعي', category: 'creative', description: 'تصميم إبداعي مع ألوان جريئة' },
-            { id: 'professional', name: 'احترافي', category: 'professional', description: 'تصميم احترافي مناسب للشركات' },
-            { id: 'timeline', name: 'خط زمني', category: 'creative', description: 'تصميم بخط زمني للخبرات' },
-            { id: 'minimal', name: 'بسيط', category: 'minimal', description: 'تصميم بسيط ونظيف' }
-        ];
-
-        const COLORS = ['#1e3a5f', '#2c3e50', '#e74c3c', '#27ae60', '#8e44ad', '#d35400', '#16a085', '#c0392b', '#2980b9', '#2d3436'];
+        const COLORS = ['#2c3e50', '#e74c3c', '#27ae60', '#8e44ad', '#d35400', '#16a085', '#c0392b', '#2980b9', '#2d3436'];
 
         const SECTION_TYPES = [
             { id: 'experience', labelAr: 'الخبرات المهنية', labelFr: 'Expériences', icon: 'fa-briefcase' },
@@ -374,688 +241,117 @@
             const { personal, sections, settings } = state;
             const isAr = settings.direction === 'rtl';
 
-            const getSkillLevel = (index, total) => {
-                const levels = [90, 75, 60, 85, 70, 95, 80, 65];
-                return levels[index % levels.length];
-            };
+            const getSkillLevel = (index) => [90, 75, 60, 85, 70, 95, 80, 65][index % 8];
+            const getLanguageLevel = (level) => ({ 'اللغة الأم': 100, 'متقدم': 85, 'متوسط': 60, 'مبتدئ': 30 }[level] || 50);
 
-            const getLanguageLevel = (level) => {
-                const levels = { 'اللغة الأم': 100, 'متقدم': 85, 'متوسط': 60, 'مبتدئ': 30 };
-                return levels[level] || 50;
-            };
-
-            const renderTemplate = () => {
-                const activeSections = Object.keys(sections).filter(key => sections[key].length > 0);
-
-                switch(settings.template) {
-                    case 'modern-split':
-                        return (
-                            <div className="template-modern-split">
-                                <div className="sidebar">
-                                    <div className="photo-container">
-                                        {personal.photo ? <img src={personal.photo} alt="" /> : <div style={{width:'100%',height:'100%',background:'#ddd',display:'flex',alignItems:'center',justifyContent:'center'}}><i className="fas fa-user" style={{fontSize:40,color:'#999'}}></i></div>}
-                                    </div>
-                                    <div className="name">{personal.firstName} {personal.lastName}</div>
-                                    <div className="job-title">{personal.title}</div>
-                                    <div className="section-title">{isAr ? 'معلومات الاتصال' : 'Contact'}</div>
-                                    {personal.phone && <div className="contact-item"><i className="fas fa-phone"></i>{personal.phone}</div>}
-                                    {personal.email && <div className="contact-item"><i className="fas fa-envelope"></i>{personal.email}</div>}
-                                    {personal.address && <div className="contact-item"><i className="fas fa-map-marker-alt"></i>{personal.address}</div>}
-                                    {personal.linkedin && <div className="contact-item"><i className="fab fa-linkedin"></i>{personal.linkedin}</div>}
-                                    {personal.website && <div className="contact-item"><i className="fas fa-globe"></i>{personal.website}</div>}
-                                    {activeSections.includes('skills') && (
-                                        <><div className="section-title" style={{marginTop:25}}>{isAr ? 'المهارات' : 'Compétences'}</div>
-                                        <div>{sections.skills.map((s, i) => <span key={i} className="skill-tag">{s.name}</span>)}</div></>
-                                    )}
-                                    {activeSections.includes('languages') && (
-                                        <><div className="section-title" style={{marginTop:25}}>{isAr ? 'اللغات' : 'Langues'}</div>
-                                        {sections.languages.map((l, i) => (
-                                            <div key={i} className="language-item">
-                                                <div className="language-name">{l.name}</div>
-                                                <div className="progress-bar"><div className="progress-fill" style={{width: getLanguageLevel(l.level) + '%'}}></div></div>
-                                            </div>
-                                        ))}</>
-                                    )}
-                                    {activeSections.includes('hobbies') && (
-                                        <><div className="section-title" style={{marginTop:25}}>{isAr ? 'الهوايات' : 'Loisirs'}</div>
-                                        {sections.hobbies.map((h, i) => <span key={i} className="skill-tag">{h.name}</span>)}</>
-                                    )}
-                                </div>
-                                <div className="main-content">
-                                    {personal.summary && (
-                                        <div className="mb-6">
-                                            <div className="main-section-title"><i className="fas fa-user"></i>{isAr ? 'نبذة عني' : 'À propos'}</div>
-                                            <p style={{fontSize:13,lineHeight:1.8,color:'#4b5563'}}>{personal.summary}</p>
-                                        </div>
-                                    )}
-                                    {activeSections.includes('experience') && (
-                                        <div className="mb-6">
-                                            <div className="main-section-title"><i className="fas fa-briefcase"></i>{isAr ? 'الخبرات المهنية' : 'Expériences'}</div>
-                                            {sections.experience.map((exp, i) => (
-                                                <div key={i} className="experience-item">
-                                                    <div className="exp-title">{exp.title}</div>
-                                                    <div className="exp-company">{exp.subtitle}</div>
-                                                    <div className="exp-date">{exp.date}</div>
-                                                    <div className="exp-desc">{exp.description}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                    {activeSections.includes('education') && (
-                                        <div className="mb-6">
-                                            <div className="main-section-title"><i className="fas fa-graduation-cap"></i>{isAr ? 'التعليم' : 'Éducation'}</div>
-                                            {sections.education.map((edu, i) => (
-                                                <div key={i} className="experience-item">
-                                                    <div className="exp-title">{edu.title}</div>
-                                                    <div className="exp-company">{edu.subtitle}</div>
-                                                    <div className="exp-date">{edu.date}</div>
-                                                    <div className="exp-desc">{edu.description}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                    {activeSections.includes('courses') && (
-                                        <div className="mb-6">
-                                            <div className="main-section-title"><i className="fas fa-certificate"></i>{isAr ? 'الدورات' : 'Formations'}</div>
-                                            {sections.courses.map((c, i) => (
-                                                <div key={i} className="experience-item">
-                                                    <div className="exp-title">{c.title}</div>
-                                                    <div className="exp-company">{c.subtitle}</div>
-                                                    <div className="exp-date">{c.date}</div>
-                                                    <div className="exp-desc">{c.description}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                    {activeSections.includes('projects') && (
-                                        <div className="mb-6">
-                                            <div className="main-section-title"><i className="fas fa-project-diagram"></i>{isAr ? 'المشاريع' : 'Projets'}</div>
-                                            {sections.projects.map((p, i) => (
-                                                <div key={i} className="experience-item">
-                                                    <div className="exp-title">{p.title}</div>
-                                                    <div className="exp-company">{p.subtitle}</div>
-                                                    <div className="exp-date">{p.date}</div>
-                                                    <div className="exp-desc">{p.description}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        );
-
-                    case 'elegant':
-                        return (
-                            <div className="template-elegant">
-                                <div className="header">
-                                    <div className="name">{personal.firstName} {personal.lastName}</div>
-                                    <div className="job-title">{personal.title}</div>
-                                    <div className="contact-row">
-                                        {personal.email && <span className="contact-item"><i className="fas fa-envelope"></i> {personal.email}</span>}
-                                        {personal.phone && <span className="contact-item"><i className="fas fa-phone"></i> {personal.phone}</span>}
-                                        {personal.address && <span className="contact-item"><i className="fas fa-map-marker-alt"></i> {personal.address}</span>}
-                                        {personal.linkedin && <span className="contact-item"><i className="fab fa-linkedin"></i> {personal.linkedin}</span>}
-                                    </div>
-                                </div>
-                                {personal.summary && (
-                                    <div style={{marginBottom:25,fontSize:13,lineHeight:1.8,color:'#4b5563',textAlign:'center'}}>{personal.summary}</div>
-                                )}
-                                <div className="two-column">
-                                    <div className="left-col">
-                                        {personal.photo && (
-                                            <div style={{width:120,height:120,borderRadius:'50%',overflow:'hidden',margin:'0 auto 20px',border:'3px solid #1e3a5f'}}>
-                                                <img src={personal.photo} style={{width:'100%',height:'100%',objectFit:'cover'}} alt="" />
-                                            </div>
-                                        )}
-                                        {activeSections.includes('skills') && (
-                                            <div className="mb-6">
-                                                <div className="section-title">{isAr ? 'المهارات' : 'Compétences'}</div>
-                                                {sections.skills.map((s, i) => (
-                                                    <div key={i} className="skill-item">
-                                                        <div className="skill-name">{s.name}</div>
-                                                        <div className="skill-bar"><div className="skill-fill" style={{width: getSkillLevel(i, sections.skills.length) + '%'}}></div></div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {activeSections.includes('languages') && (
-                                            <div className="mb-6">
-                                                <div className="section-title">{isAr ? 'اللغات' : 'Langues'}</div>
-                                                {sections.languages.map((l, i) => (
-                                                    <div key={i} className="skill-item">
-                                                        <div className="skill-name">{l.name}</div>
-                                                        <div className="skill-bar"><div className="skill-fill" style={{width: getLanguageLevel(l.level) + '%'}}></div></div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {activeSections.includes('hobbies') && (
-                                            <div>
-                                                <div className="section-title">{isAr ? 'الهوايات' : 'Loisirs'}</div>
-                                                <div style={{fontSize:12,color:'#4b5563',lineHeight:1.8}}>
-                                                    {sections.hobbies.map((h, i) => <span key={i}>• {h.name} </span>)}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="right-col">
-                                        {activeSections.includes('experience') && (
-                                            <div className="mb-6">
-                                                <div className="section-title">{isAr ? 'الخبرات المهنية' : 'Expériences Professionnelles'}</div>
-                                                {sections.experience.map((exp, i) => (
-                                                    <div key={i} className="experience-item">
-                                                        <div className="exp-header">
-                                                            <span className="exp-title">{exp.title}</span>
-                                                            <span className="exp-date">{exp.date}</span>
-                                                        </div>
-                                                        <div className="exp-company">{exp.subtitle}</div>
-                                                        <div className="exp-desc">{exp.description}</div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {activeSections.includes('education') && (
-                                            <div className="mb-6">
-                                                <div className="section-title">{isAr ? 'التعليم' : 'Éducation'}</div>
-                                                {sections.education.map((edu, i) => (
-                                                    <div key={i} className="experience-item">
-                                                        <div className="exp-header">
-                                                            <span className="exp-title">{edu.title}</span>
-                                                            <span className="exp-date">{edu.date}</span>
-                                                        </div>
-                                                        <div className="exp-company">{edu.subtitle}</div>
-                                                        <div className="exp-desc">{edu.description}</div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {activeSections.includes('courses') && (
-                                            <div className="mb-6">
-                                                <div className="section-title">{isAr ? 'الدورات' : 'Formations'}</div>
-                                                {sections.courses.map((c, i) => (
-                                                    <div key={i} className="experience-item">
-                                                        <div className="exp-header">
-                                                            <span className="exp-title">{c.title}</span>
-                                                            <span className="exp-date">{c.date}</span>
-                                                        </div>
-                                                        <div className="exp-company">{c.subtitle}</div>
-                                                        <div className="exp-desc">{c.description}</div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {activeSections.includes('projects') && (
-                                            <div>
-                                                <div className="section-title">{isAr ? 'المشاريع' : 'Projets'}</div>
-                                                {sections.projects.map((p, i) => (
-                                                    <div key={i} className="experience-item">
-                                                        <div className="exp-header">
-                                                            <span className="exp-title">{p.title}</span>
-                                                            <span className="exp-date">{p.date}</span>
-                                                        </div>
-                                                        <div className="exp-company">{p.subtitle}</div>
-                                                        <div className="exp-desc">{p.description}</div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        );
-
-                    case 'creative':
-                        return (
-                            <div className="template-creative">
-                                <div className="left-panel">
-                                    <div className="photo-container">
-                                        {personal.photo ? <img src={personal.photo} alt="" /> : <div style={{width:'100%',height:'100%',background:'#ddd',display:'flex',alignItems:'center',justifyContent:'center'}}><i className="fas fa-user" style={{fontSize:40,color:'#999'}}></i></div>}
-                                    </div>
-                                    <div className="name">{personal.firstName}</div>
-                                    <div className="name" style={{marginTop:-5}}>{personal.lastName}</div>
-                                    <div className="job-title">{personal.title}</div>
-                                    <div className="section-title">{isAr ? 'معلومات الاتصال' : 'Contact'}</div>
-                                    {personal.phone && <div className="contact-item"><div className="contact-icon"><i className="fas fa-phone"></i></div>{personal.phone}</div>}
-                                    {personal.email && <div className="contact-item"><div className="contact-icon"><i className="fas fa-envelope"></i></div>{personal.email}</div>}
-                                    {personal.address && <div className="contact-item"><div className="contact-icon"><i className="fas fa-map-marker-alt"></i></div>{personal.address}</div>}
-                                    {personal.linkedin && <div className="contact-item"><div className="contact-icon"><i className="fab fa-linkedin"></i></div>{personal.linkedin}</div>}
-                                    {personal.website && <div className="contact-item"><div className="contact-icon"><i className="fas fa-globe"></i></div>{personal.website}</div>}
-                                    {activeSections.includes('skills') && (
-                                        <><div className="section-title" style={{marginTop:30}}>{isAr ? 'المهارات' : 'Compétences'}</div>
-                                        {sections.skills.map((s, i) => (
-                                            <div key={i} style={{marginBottom:10}}>
-                                                <div style={{fontSize:12,marginBottom:4}}>{s.name}</div>
-                                                <div style={{height:4,background:'rgba(255,255,255,0.2)',borderRadius:2,overflow:'hidden'}}>
-                                                    <div style={{height:'100%',width:getSkillLevel(i, sections.skills.length)+'%',background:'#3498db',borderRadius:2}}></div>
-                                                </div>
-                                            </div>
-                                        ))}</>
-                                    )}
-                                    {activeSections.includes('languages') && (
-                                        <><div className="section-title" style={{marginTop:30}}>{isAr ? 'اللغات' : 'Langues'}</div>
-                                        {sections.languages.map((l, i) => (
-                                            <div key={i} style={{marginBottom:8}}>
-                                                <div style={{fontSize:12}}>{l.name}</div>
-                                                <div style={{fontSize:10,opacity:0.7}}>{l.level}</div>
-                                            </div>
-                                        ))}</>
-                                    )}
-                                    {activeSections.includes('hobbies') && (
-                                        <><div className="section-title" style={{marginTop:30}}>{isAr ? 'الهوايات' : 'Loisirs'}</div>
-                                        <div style={{display:'flex',flexWrap:'wrap',gap:5}}>
-                                            {sections.hobbies.map((h, i) => <span key={i} style={{background:'rgba(255,255,255,0.1)',padding:'4px 10px',borderRadius:12,fontSize:11}}>{h.name}</span>)}
-                                        </div></>
-                                    )}
-                                </div>
-                                <div className="right-panel">
-                                    {personal.summary && (
-                                        <div className="mb-6">
-                                            <div className="main-section-title"><div className="icon-box"><i className="fas fa-user"></i></div>{isAr ? 'نبذة عني' : 'À propos'}</div>
-                                            <p style={{fontSize:13,lineHeight:1.8,color:'#555'}}>{personal.summary}</p>
-                                        </div>
-                                    )}
-                                    {activeSections.includes('experience') && (
-                                        <div className="mb-6">
-                                            <div className="main-section-title"><div className="icon-box"><i className="fas fa-briefcase"></i></div>{isAr ? 'الخبرات المهنية' : 'Expériences'}</div>
-                                            {sections.experience.map((exp, i) => (
-                                                <div key={i} className="experience-item">
-                                                    <div className="exp-header">
-                                                        <span className="exp-title">{exp.title}</span>
-                                                        <span className="exp-date">{exp.date}</span>
-                                                    </div>
-                                                    <div className="exp-company">{exp.subtitle}</div>
-                                                    <div className="exp-desc">{exp.description}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                    {activeSections.includes('education') && (
-                                        <div className="mb-6">
-                                            <div className="main-section-title"><div className="icon-box"><i className="fas fa-graduation-cap"></i></div>{isAr ? 'التعليم' : 'Éducation'}</div>
-                                            {sections.education.map((edu, i) => (
-                                                <div key={i} className="experience-item">
-                                                    <div className="exp-header">
-                                                        <span className="exp-title">{edu.title}</span>
-                                                        <span className="exp-date">{edu.date}</span>
-                                                    </div>
-                                                    <div className="exp-company">{edu.subtitle}</div>
-                                                    <div className="exp-desc">{edu.description}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                    {activeSections.includes('courses') && (
-                                        <div className="mb-6">
-                                            <div className="main-section-title"><div className="icon-box"><i className="fas fa-certificate"></i></div>{isAr ? 'الدورات' : 'Formations'}</div>
-                                            {sections.courses.map((c, i) => (
-                                                <div key={i} className="experience-item">
-                                                    <div className="exp-header">
-                                                        <span className="exp-title">{c.title}</span>
-                                                        <span className="exp-date">{c.date}</span>
-                                                    </div>
-                                                    <div className="exp-company">{c.subtitle}</div>
-                                                    <div className="exp-desc">{c.description}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                    {activeSections.includes('projects') && (
-                                        <div>
-                                            <div className="main-section-title"><div className="icon-box"><i className="fas fa-project-diagram"></i></div>{isAr ? 'المشاريع' : 'Projets'}</div>
-                                            {sections.projects.map((p, i) => (
-                                                <div key={i} className="experience-item">
-                                                    <div className="exp-header">
-                                                        <span className="exp-title">{p.title}</span>
-                                                        <span className="exp-date">{p.date}</span>
-                                                    </div>
-                                                    <div className="exp-company">{p.subtitle}</div>
-                                                    <div className="exp-desc">{p.description}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        );
-
-                    case 'professional':
-                        return (
-                            <div className="template-professional">
-                                <div className="header">
-                                    <div className="photo-container">
-                                        {personal.photo ? <img src={personal.photo} alt="" /> : <div style={{width:'100%',height:'100%',background:'#ddd',display:'flex',alignItems:'center',justifyContent:'center'}}><i className="fas fa-user" style={{fontSize:30,color:'#999'}}></i></div>}
-                                    </div>
-                                    <div className="header-info">
-                                        <div className="name">{personal.firstName} {personal.lastName}</div>
-                                        <div className="job-title">{personal.title}</div>
-                                        <div className="contact-grid">
-                                            {personal.email && <div className="contact-item"><i className="fas fa-envelope"></i> {personal.email}</div>}
-                                            {personal.phone && <div className="contact-item"><i className="fas fa-phone"></i> {personal.phone}</div>}
-                                            {personal.address && <div className="contact-item"><i className="fas fa-map-marker-alt"></i> {personal.address}</div>}
-                                            {personal.linkedin && <div className="contact-item"><i className="fab fa-linkedin"></i> {personal.linkedin}</div>}
-                                            {personal.website && <div className="contact-item"><i className="fas fa-globe"></i> {personal.website}</div>}
-                                            {personal.city && <div className="contact-item"><i className="fas fa-city"></i> {personal.city}</div>}
-                                        </div>
-                                    </div>
-                                </div>
-                                {personal.summary && (
-                                    <div className="summary">{personal.summary}</div>
-                                )}
-                                {activeSections.includes('experience') && (
-                                    <div className="mb-6">
-                                        <div className="section-title"><i className="fas fa-briefcase"></i>{isAr ? 'الخبرات المهنية' : 'Expériences Professionnelles'}</div>
-                                        {sections.experience.map((exp, i) => (
-                                            <div key={i} className="experience-item">
-                                                <div className="exp-date">{exp.date}</div>
-                                                <div>
-                                                    <div className="exp-title">{exp.title}</div>
-                                                    <div className="exp-company">{exp.subtitle}</div>
-                                                    <div className="exp-desc">{exp.description}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                {activeSections.includes('education') && (
-                                    <div className="mb-6">
-                                        <div className="section-title"><i className="fas fa-graduation-cap"></i>{isAr ? 'التعليم' : 'Éducation'}</div>
-                                        {sections.education.map((edu, i) => (
-                                            <div key={i} className="experience-item">
-                                                <div className="exp-date">{edu.date}</div>
-                                                <div>
-                                                    <div className="exp-title">{edu.title}</div>
-                                                    <div className="exp-company">{edu.subtitle}</div>
-                                                    <div className="exp-desc">{edu.description}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                {activeSections.includes('skills') && (
-                                    <div className="mb-6">
-                                        <div className="section-title"><i className="fas fa-tools"></i>{isAr ? 'المهارات' : 'Compétences'}</div>
-                                        <div className="skills-grid">
-                                            {sections.skills.map((s, i) => <span key={i} className="skill-tag">{s.name}</span>)}
-                                        </div>
-                                    </div>
-                                )}
-                                {activeSections.includes('languages') && (
-                                    <div className="mb-6">
-                                        <div className="section-title"><i className="fas fa-language"></i>{isAr ? 'اللغات' : 'Langues'}</div>
-                                        <div className="skills-grid">
-                                            {sections.languages.map((l, i) => <span key={i} className="skill-tag">{l.name} ({l.level})</span>)}
-                                        </div>
-                                    </div>
-                                )}
-                                {activeSections.includes('courses') && (
-                                    <div className="mb-6">
-                                        <div className="section-title"><i className="fas fa-certificate"></i>{isAr ? 'الدورات' : 'Formations'}</div>
-                                        {sections.courses.map((c, i) => (
-                                            <div key={i} className="experience-item">
-                                                <div className="exp-date">{c.date}</div>
-                                                <div>
-                                                    <div className="exp-title">{c.title}</div>
-                                                    <div className="exp-company">{c.subtitle}</div>
-                                                    <div className="exp-desc">{c.description}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                {activeSections.includes('projects') && (
-                                    <div className="mb-6">
-                                        <div className="section-title"><i className="fas fa-project-diagram"></i>{isAr ? 'المشاريع' : 'Projets'}</div>
-                                        {sections.projects.map((p, i) => (
-                                            <div key={i} className="experience-item">
-                                                <div className="exp-date">{p.date}</div>
-                                                <div>
-                                                    <div className="exp-title">{p.title}</div>
-                                                    <div className="exp-company">{p.subtitle}</div>
-                                                    <div className="exp-desc">{p.description}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                {activeSections.includes('hobbies') && (
-                                    <div>
-                                        <div className="section-title"><i className="fas fa-heart"></i>{isAr ? 'الهوايات' : 'Loisirs'}</div>
-                                        <div className="skills-grid">
-                                            {sections.hobbies.map((h, i) => <span key={i} className="skill-tag">{h.name}</span>)}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        );
-
-                    case 'timeline':
-                        return (
-                            <div className="template-timeline">
-                                <div className="header">
-                                    <div className="photo-container">
-                                        {personal.photo ? <img src={personal.photo} alt="" /> : <div style={{width:'100%',height:'100%',background:'#ddd',display:'flex',alignItems:'center',justifyContent:'center'}}><i className="fas fa-user" style={{fontSize:40,color:'#999'}}></i></div>}
-                                    </div>
-                                    <div className="name">{personal.firstName} {personal.lastName}</div>
-                                    <div className="job-title">{personal.title}</div>
-                                    <div className="contact-row">
-                                        {personal.email && <span className="contact-item">{personal.email}</span>}
-                                        {personal.phone && <span className="contact-item">{personal.phone}</span>}
-                                        {personal.address && <span className="contact-item">{personal.address}</span>}
-                                    </div>
-                                </div>
-                                {personal.summary && (
-                                    <div style={{marginBottom:30,textAlign:'center',fontSize:13,lineHeight:1.8,color:'#555',maxWidth:500,margin:'0 auto 30px'}}>{personal.summary}</div>
-                                )}
-                                {activeSections.includes('experience') && (
-                                    <div className="mb-8">
-                                        <div className="section-title">{isAr ? 'الخبرات المهنية' : 'Expériences Professionnelles'}</div>
-                                        <div className="timeline">
-                                            {sections.experience.map((exp, i) => (
-                                                <div key={i} className="timeline-item">
-                                                    <div className="exp-date">{exp.date}</div>
-                                                    <div className="exp-title">{exp.title}</div>
-                                                    <div className="exp-company">{exp.subtitle}</div>
-                                                    <div className="exp-desc">{exp.description}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                                {activeSections.includes('education') && (
-                                    <div className="mb-8">
-                                        <div className="section-title">{isAr ? 'التعليم' : 'Éducation'}</div>
-                                        <div className="timeline">
-                                            {sections.education.map((edu, i) => (
-                                                <div key={i} className="timeline-item">
-                                                    <div className="exp-date">{edu.date}</div>
-                                                    <div className="exp-title">{edu.title}</div>
-                                                    <div className="exp-company">{edu.subtitle}</div>
-                                                    <div className="exp-desc">{edu.description}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                                <div style={{display:'flex',gap:30}}>
-                                    <div style={{flex:1}}>
-                                        {activeSections.includes('skills') && (
-                                            <div className="mb-6">
-                                                <div className="section-title">{isAr ? 'المهارات' : 'Compétences'}</div>
-                                                <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
-                                                    {sections.skills.map((s, i) => <span key={i} style={{background:'#e74c3c',color:'white',padding:'5px 12px',borderRadius:15,fontSize:11}}>{s.name}</span>)}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div style={{flex:1}}>
-                                        {activeSections.includes('languages') && (
-                                            <div className="mb-6">
-                                                <div className="section-title">{isAr ? 'اللغات' : 'Langues'}</div>
-                                                {sections.languages.map((l, i) => (
-                                                    <div key={i} style={{marginBottom:8,fontSize:13}}>
-                                                        <span style={{fontWeight:600}}>{l.name}</span> - <span style={{color:'#7f8c8d'}}>{l.level}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        );
-
-                    case 'minimal':
-                        return (
-                            <div className="template-minimal">
-                                <div className="header">
-                                    <div className="name">{personal.firstName} {personal.lastName}</div>
-                                    <div className="job-title">{personal.title}</div>
-                                    <div className="contact-row">
-                                        {personal.email && <span className="contact-item"><i className="fas fa-envelope"></i> {personal.email}</span>}
-                                        {personal.phone && <span className="contact-item"><i className="fas fa-phone"></i> {personal.phone}</span>}
-                                        {personal.address && <span className="contact-item"><i className="fas fa-map-marker-alt"></i> {personal.address}</span>}
-                                        {personal.linkedin && <span className="contact-item"><i className="fab fa-linkedin"></i> {personal.linkedin}</span>}
-                                    </div>
-                                </div>
-                                {personal.summary && (
-                                    <div style={{marginBottom:30,fontSize:13,lineHeight:1.8,color:'#555'}}>{personal.summary}</div>
-                                )}
-                                {activeSections.includes('experience') && (
-                                    <div className="mb-8">
-                                        <div className="section-title">{isAr ? 'الخبرات المهنية' : 'Expériences Professionnelles'}</div>
-                                        {sections.experience.map((exp, i) => (
-                                            <div key={i} className="experience-item">
-                                                <div className="exp-header">
-                                                    <span className="exp-title">{exp.title}</span>
-                                                    <span className="exp-date">{exp.date}</span>
-                                                </div>
-                                                <div className="exp-company">{exp.subtitle}</div>
-                                                <div className="exp-desc">{exp.description}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                {activeSections.includes('education') && (
-                                    <div className="mb-8">
-                                        <div className="section-title">{isAr ? 'التعليم' : 'Éducation'}</div>
-                                        {sections.education.map((edu, i) => (
-                                            <div key={i} className="experience-item">
-                                                <div className="exp-header">
-                                                    <span className="exp-title">{edu.title}</span>
-                                                    <span className="exp-date">{edu.date}</span>
-                                                </div>
-                                                <div className="exp-company">{edu.subtitle}</div>
-                                                <div className="exp-desc">{edu.description}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                {activeSections.includes('skills') && (
-                                    <div className="mb-8">
-                                        <div className="section-title">{isAr ? 'المهارات' : 'Compétences'}</div>
-                                        <div className="skills-list">
-                                            {sections.skills.map((s, i) => <span key={i} className="skill-item">{s.name}</span>)}
-                                        </div>
-                                    </div>
-                                )}
-                                {activeSections.includes('languages') && (
-                                    <div className="mb-8">
-                                        <div className="section-title">{isAr ? 'اللغات' : 'Langues'}</div>
-                                        <div className="skills-list">
-                                            {sections.languages.map((l, i) => <span key={i} className="skill-item">{l.name} ({l.level})</span>)}
-                                        </div>
-                                    </div>
-                                )}
-                                {activeSections.includes('courses') && (
-                                    <div className="mb-8">
-                                        <div className="section-title">{isAr ? 'الدورات' : 'Formations'}</div>
-                                        {sections.courses.map((c, i) => (
-                                            <div key={i} className="experience-item">
-                                                <div className="exp-header">
-                                                    <span className="exp-title">{c.title}</span>
-                                                    <span className="exp-date">{c.date}</span>
-                                                </div>
-                                                <div className="exp-company">{c.subtitle}</div>
-                                                <div className="exp-desc">{c.description}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                {activeSections.includes('projects') && (
-                                    <div className="mb-8">
-                                        <div className="section-title">{isAr ? 'المشاريع' : 'Projets'}</div>
-                                        {sections.projects.map((p, i) => (
-                                            <div key={i} className="experience-item">
-                                                <div className="exp-header">
-                                                    <span className="exp-title">{p.title}</span>
-                                                    <span className="exp-date">{p.date}</span>
-                                                </div>
-                                                <div className="exp-company">{p.subtitle}</div>
-                                                <div className="exp-desc">{p.description}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                {activeSections.includes('hobbies') && (
-                                    <div>
-                                        <div className="section-title">{isAr ? 'الهوايات' : 'Loisirs'}</div>
-                                        <div className="skills-list">
-                                            {sections.hobbies.map((h, i) => <span key={i} className="skill-item">{h.name}</span>)}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        );
-
-                    default:
-                        return <div>Template not found</div>;
-                }
-            };
+            const activeSections = Object.keys(sections).filter(key => sections[key].length > 0);
 
             return (
-                <div id="print-area" className="a4-paper" dir={settings.direction}>
-                    {renderTemplate()}
-                </div>
-            );
-        };
-
-        // Template Preview Modal
-        const TemplatePreviewModal = ({ template, onClose, onSelect }) => {
-            const { state } = useContext(AppContext);
-            const isAr = state.lang === 'ar';
-
-            return (
-                <div className="modal-overlay" onClick={onClose}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <button className="modal-close" onClick={onClose}><i className="fas fa-times"></i></button>
-                        <div className="p-6">
-                            <h2 className="text-2xl font-bold mb-2 text-center">{template.name}</h2>
-                            <p className="text-gray-500 text-center mb-6">{template.description}</p>
-                            <div className="flex justify-center mb-6">
-                                <div className="border-4 border-gray-200 rounded-lg overflow-hidden" style={{width:210, height:297, transform:'scale(0.8)', transformOrigin:'top center'}}>
-                                    {/* Mini preview would go here - using a placeholder */}
-                                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                        <div className="text-center">
-                                            <i className="fas fa-file-alt text-4xl text-gray-400 mb-2"></i>
-                                            <p className="text-sm text-gray-500">{template.name}</p>
-                                        </div>
+                <div id="print-area" className="a4-paper template-creative" dir={settings.direction}>
+                    <div className="left-panel">
+                        <div className="name">{personal.firstName}</div>
+                        <div className="name" style={{marginTop:-5}}>{personal.lastName}</div>
+                        <div className="job-title">{personal.title}</div>
+                        <div className="section-title">{isAr ? 'معلومات الاتصال' : 'Contact'}</div>
+                        {personal.phone && <div className="contact-item"><div className="contact-icon"><i className="fas fa-phone"></i></div>{personal.phone}</div>}
+                        {personal.email && <div className="contact-item"><div className="contact-icon"><i className="fas fa-envelope"></i></div>{personal.email}</div>}
+                        {personal.address && <div className="contact-item"><div className="contact-icon"><i className="fas fa-map-marker-alt"></i></div>{personal.address}</div>}
+                        {personal.linkedin && <div className="contact-item"><div className="contact-icon"><i className="fab fa-linkedin"></i></div>{personal.linkedin}</div>}
+                        {personal.website && <div className="contact-item"><div className="contact-icon"><i className="fas fa-globe"></i></div>{personal.website}</div>}
+                        {activeSections.includes('skills') && (
+                            <><div className="section-title" style={{marginTop:30}}>{isAr ? 'المهارات' : 'Compétences'}</div>
+                            {sections.skills.map((s, i) => (
+                                <div key={i} style={{marginBottom:10}}>
+                                    <div style={{fontSize:12,marginBottom:4}}>{s.name}</div>
+                                    <div style={{height:4,background:'rgba(255,255,255,0.2)',borderRadius:2,overflow:'hidden'}}>
+                                        <div style={{height:'100%',width:getSkillLevel(i)+'%',background:'#3498db',borderRadius:2}}></div>
                                     </div>
                                 </div>
+                            ))}</>
+                        )}
+                        {activeSections.includes('languages') && (
+                            <><div className="section-title" style={{marginTop:30}}>{isAr ? 'اللغات' : 'Langues'}</div>
+                            {sections.languages.map((l, i) => (
+                                <div key={i} style={{marginBottom:8}}>
+                                    <div style={{fontSize:12}}>{l.name}</div>
+                                    <div style={{fontSize:10,opacity:0.7}}>{l.level}</div>
+                                </div>
+                            ))}</>
+                        )}
+                        {activeSections.includes('hobbies') && (
+                            <><div className="section-title" style={{marginTop:30}}>{isAr ? 'الهوايات' : 'Loisirs'}</div>
+                            <div style={{display:'flex',flexWrap:'wrap',gap:5}}>
+                                {sections.hobbies.map((h, i) => <span key={i} style={{background:'rgba(255,255,255,0.1)',padding:'4px 10px',borderRadius:12,fontSize:11}}>{h.name}</span>)}
+                            </div></>
+                        )}
+                    </div>
+                    <div className="right-panel">
+                        {personal.summary && (
+                            <div className="mb-6">
+                                <div className="main-section-title"><div className="icon-box"><i className="fas fa-user"></i></div>{isAr ? 'نبذة عني' : 'À propos'}</div>
+                                <p style={{fontSize:13,lineHeight:1.8,color:'#555'}}>{personal.summary}</p>
                             </div>
-                            <div className="flex justify-center gap-3">
-                                <button 
-                                    onClick={() => { onSelect(template.id); onClose(); }}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition"
-                                >
-                                    {isAr ? 'استخدام هذا القالب' : 'Utiliser ce modèle'}
-                                </button>
-                                <button 
-                                    onClick={onClose}
-                                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-300 transition"
-                                >
-                                    {isAr ? 'إغلاق' : 'Fermer'}
-                                </button>
+                        )}
+                        {activeSections.includes('experience') && (
+                            <div className="mb-6">
+                                <div className="main-section-title"><div className="icon-box"><i className="fas fa-briefcase"></i></div>{isAr ? 'الخبرات المهنية' : 'Expériences'}</div>
+                                {sections.experience.map((exp, i) => (
+                                    <div key={i} className="experience-item">
+                                        <div className="exp-header">
+                                            <span className="exp-title">{exp.title}</span>
+                                            <span className="exp-date">{exp.date}</span>
+                                        </div>
+                                        <div className="exp-company">{exp.subtitle}</div>
+                                        <div className="exp-desc">{exp.description}</div>
+                                    </div>
+                                ))}
                             </div>
-                        </div>
+                        )}
+                        {activeSections.includes('education') && (
+                            <div className="mb-6">
+                                <div className="main-section-title"><div className="icon-box"><i className="fas fa-graduation-cap"></i></div>{isAr ? 'التعليم' : 'Éducation'}</div>
+                                {sections.education.map((edu, i) => (
+                                    <div key={i} className="experience-item">
+                                        <div className="exp-header">
+                                            <span className="exp-title">{edu.title}</span>
+                                            <span className="exp-date">{edu.date}</span>
+                                        </div>
+                                        <div className="exp-company">{edu.subtitle}</div>
+                                        <div className="exp-desc">{edu.description}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {activeSections.includes('courses') && (
+                            <div className="mb-6">
+                                <div className="main-section-title"><div className="icon-box"><i className="fas fa-certificate"></i></div>{isAr ? 'الدورات' : 'Formations'}</div>
+                                {sections.courses.map((c, i) => (
+                                    <div key={i} className="experience-item">
+                                        <div className="exp-header">
+                                            <span className="exp-title">{c.title}</span>
+                                            <span className="exp-date">{c.date}</span>
+                                        </div>
+                                        <div className="exp-company">{c.subtitle}</div>
+                                        <div className="exp-desc">{c.description}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {activeSections.includes('projects') && (
+                            <div>
+                                <div className="main-section-title"><div className="icon-box"><i className="fas fa-project-diagram"></i></div>{isAr ? 'المشاريع' : 'Projets'}</div>
+                                {sections.projects.map((p, i) => (
+                                    <div key={i} className="experience-item">
+                                        <div className="exp-header">
+                                            <span className="exp-title">{p.title}</span>
+                                            <span className="exp-date">{p.date}</span>
+                                        </div>
+                                        <div className="exp-company">{p.subtitle}</div>
+                                        <div className="exp-desc">{p.description}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             );
@@ -1067,8 +363,6 @@
                 return saved ? JSON.parse(saved) : DEMO_DATA;
             });
             const [activeTab, setActiveTab] = useState('content');
-            const [previewTemplate, setPreviewTemplate] = useState(null);
-            const [showPreviewModal, setShowPreviewModal] = useState(false);
 
             useEffect(() => {
                 localStorage.setItem('cv_builder_data', JSON.stringify(state));
@@ -1083,9 +377,7 @@
             };
 
             const addSection = (type) => {
-                if (state.sections[type].length === 0) {
-                    updateSection(type, [{ name: '' }]);
-                }
+                if (state.sections[type].length === 0) updateSection(type, [{ name: '' }]);
             };
 
             const removeSection = (type) => {
@@ -1094,15 +386,6 @@
 
             const updateSettings = (key, value) => {
                 setState(prev => ({ ...prev, settings: { ...prev.settings, [key]: value } }));
-            };
-
-            const handleImageUpload = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => updatePersonal('photo', reader.result);
-                    reader.readAsDataURL(file);
-                }
             };
 
             const handleExportPDF = () => {
@@ -1114,17 +397,11 @@
                     html2canvas: { scale: 2, useCORS: true },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
-
                 if (typeof html2pdf !== 'undefined') {
                     html2pdf().set(opt).from(element).save();
                 } else {
                     window.print();
                 }
-            };
-
-            const openPreview = (template) => {
-                setPreviewTemplate(template);
-                setShowPreviewModal(true);
             };
 
             const isAr = state.lang === 'ar';
@@ -1136,24 +413,17 @@
                 addSection: isAr ? 'إضافة قسم' : 'Ajouter une section',
                 download: isAr ? 'تحميل PDF' : 'Télécharger PDF',
                 print: isAr ? 'طباعة' : 'Imprimer',
-                templates: isAr ? 'القوالب' : 'Modèles',
                 colors: isAr ? 'الألوان' : 'Couleurs',
                 fonts: isAr ? 'الخطوط' : 'Polices',
                 spacing: isAr ? 'التباعد' : 'Espacement',
-                fontSize: isAr ? 'الحجم' : 'Taille',
-                direction: isAr ? 'الاتجاه' : 'Direction',
-                darkMode: isAr ? 'الوضع الداكن' : 'Mode Sombre',
-                preview: isAr ? 'معاينة' : 'Aperçu',
-                useTemplate: isAr ? 'استخدام' : 'Utiliser'
+                fontSize: isAr ? 'الحجم' : 'Taille'
             };
 
             return (
                 <AppContext.Provider value={{ state, setState }}>
                     <div className="flex h-screen flex-col md:flex-row overflow-hidden">
-
                         {/* Left Sidebar: Editor */}
                         <div className="w-full md:w-[450px] lg:w-[500px] bg-white dark:bg-slate-900 border-l dark:border-slate-700 flex flex-col h-full z-20 shadow-xl">
-
                             {/* Top Bar */}
                             <div className="p-4 border-b dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-800">
                                 <div className="flex items-center gap-2">
@@ -1161,7 +431,7 @@
                                     <h1 className="font-bold text-xl tracking-tight">Pro<span className="text-blue-600">Builder</span></h1>
                                 </div>
                                 <div className="flex gap-2">
-                                    <button onClick={() => setState(prev => ({...prev, lang: prev.lang === 'ar' ? 'fr' : 'ar', settings: {...prev.settings, direction: prev.lang === 'ar' ? 'ltr' : 'rtl'}}))} 
+                                    <button onClick={() => setState(prev => ({...prev, lang: prev.lang === 'ar' ? 'fr' : 'ar', settings: {...prev.settings, direction: prev.lang === 'ar' ? 'ltr' : 'rtl'}}))}
                                         className="px-3 py-1 rounded-md bg-gray-200 dark:bg-slate-700 text-sm font-bold hover:bg-gray-300 transition">
                                         {state.lang === 'ar' ? 'FR' : 'AR'}
                                     </button>
@@ -1174,11 +444,8 @@
                             {/* Tabs */}
                             <div className="flex border-b dark:border-slate-700">
                                 {['content', 'design', 'settings'].map(tab => (
-                                    <button 
-                                        key={tab}
-                                        onClick={() => setActiveTab(tab)}
-                                        className={`flex-1 py-3 text-sm font-medium transition-colors relative ${activeTab === tab ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-                                    >
+                                    <button key={tab} onClick={() => setActiveTab(tab)}
+                                        className={`flex-1 py-3 text-sm font-medium transition-colors relative ${activeTab === tab ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>
                                         {text[tab]}
                                         {activeTab === tab && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
                                     </button>
@@ -1210,34 +477,14 @@
                                                 <InputField label={isAr ? 'LinkedIn' : 'LinkedIn'} value={state.personal.linkedin} onChange={(v) => updatePersonal('linkedin', v)} />
                                                 <InputField label={isAr ? 'الموقع' : 'Site web'} value={state.personal.website} onChange={(v) => updatePersonal('website', v)} />
                                                 <InputField label={isAr ? 'نبذة مختصرة' : 'Résumé'} area={true} value={state.personal.summary} onChange={(v) => updatePersonal('summary', v)} />
-
-                                                <div className="mb-4">
-                                                    <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">{isAr ? 'الصورة الشخصية' : 'Photo'}</label>
-                                                    <div className="flex items-center gap-4">
-                                                        <label className="cursor-pointer flex-1 py-2 border-2 border-dashed border-gray-300 rounded-lg text-center text-sm text-gray-500 hover:border-blue-500 hover:text-blue-500 transition">
-                                                            <i className="fas fa-camera mr-2"></i> {state.personal.photo ? (isAr ? 'تغيير' : 'Changer') : (isAr ? 'إضافة صورة' : 'Ajouter')}
-                                                            <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
-                                                        </label>
-                                                        {state.personal.photo && (
-                                                            <button onClick={() => updatePersonal('photo', null)} className="text-red-500 hover:bg-red-50 p-2 rounded-full">
-                                                                <i className="fas fa-trash"></i>
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
                                             </div>
 
                                             {/* Dynamic Sections */}
                                             {Object.keys(state.sections).map(key => {
                                                 if (state.sections[key].length > 0) {
                                                     return (
-                                                        <SectionEditor 
-                                                            key={key} 
-                                                            type={key} 
-                                                            data={state.sections[key]} 
-                                                            onChange={(d) => updateSection(key, d)}
-                                                            onDelete={() => removeSection(key)}
-                                                        />
+                                                        <SectionEditor key={key} type={key} data={state.sections[key]}
+                                                            onChange={(d) => updateSection(key, d)} onDelete={() => removeSection(key)} />
                                                     );
                                                 }
                                                 return null;
@@ -1261,57 +508,16 @@
 
                                     {activeTab === 'design' && (
                                         <motion.div key="design" initial={{opacity:0, x:20}} animate={{opacity:1, x:0}} exit={{opacity:0, x:-20}} className="space-y-8">
-                                            {/* Templates with Preview */}
-                                            <div>
-                                                <h3 className="font-bold mb-3 text-sm uppercase text-gray-500">{text.templates}</h3>
-                                                <div className="grid grid-cols-2 gap-3">
-                                                    {TEMPLATES.map(t => (
-                                                        <div key={t.id} className={`template-card relative p-3 rounded-lg border-2 text-center transition-all ${state.settings.template === t.id ? 'border-blue-500 bg-blue-50 dark:bg-slate-800' : 'border-gray-200 dark:border-slate-700'}`}>
-                                                            <div className="h-32 bg-gray-200 dark:bg-slate-700 rounded mb-2 relative overflow-hidden template-preview-img transition-all">
-                                                                <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-xs font-bold">
-                                                                    {t.name}
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center justify-between">
-                                                                <span className="text-xs font-bold">{t.name}</span>
-                                                                <div className="flex gap-1">
-                                                                    <button 
-                                                                        onClick={() => openPreview(t)}
-                                                                        className="preview-btn px-2 py-1 bg-white text-gray-700 rounded text-xs font-bold shadow-lg hover:bg-gray-100"
-                                                                    >
-                                                                        <i className="fas fa-eye mr-1"></i>{text.preview}
-                                                                    </button>
-                                                                    <button 
-                                                                        onClick={() => updateSettings('template', t.id)}
-                                                                        className={`px-2 py-1 rounded text-xs font-bold transition ${state.settings.template === t.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
-                                                                    >
-                                                                        {state.settings.template === t.id ? (isAr ? 'مختار' : 'Sélectionné') : text.useTemplate}
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-
                                             {/* Colors */}
                                             <div>
                                                 <h3 className="font-bold mb-3 text-sm uppercase text-gray-500">{text.colors}</h3>
                                                 <div className="flex flex-wrap gap-3">
                                                     {COLORS.map(c => (
-                                                        <button 
-                                                            key={c}
-                                                            onClick={() => updateSettings('color', c)}
+                                                        <button key={c} onClick={() => updateSettings('color', c)}
                                                             className={`w-8 h-8 rounded-full transition-transform hover:scale-110 ${state.settings.color === c ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
-                                                            style={{ backgroundColor: c }}
-                                                        />
+                                                            style={{ backgroundColor: c }} />
                                                     ))}
-                                                    <input 
-                                                        type="color" 
-                                                        value={state.settings.color} 
-                                                        onChange={(e) => updateSettings('color', e.target.value)}
-                                                        className="w-8 h-8 p-0 border-0 rounded-full overflow-hidden cursor-pointer"
-                                                    />
+                                                    <input type="color" value={state.settings.color} onChange={(e) => updateSettings('color', e.target.value)} className="w-8 h-8 p-0 border-0 rounded-full overflow-hidden cursor-pointer" />
                                                 </div>
                                             </div>
 
@@ -1320,11 +526,8 @@
                                                 <h3 className="font-bold mb-3 text-sm uppercase text-gray-500">{text.fonts}</h3>
                                                 <div className="space-y-2">
                                                     {[{id:'tajawal',name:'Tajawal'},{id:'cairo',name:'Cairo'},{id:'inter',name:'Inter'}].map(f => (
-                                                        <button 
-                                                            key={f.id}
-                                                            onClick={() => updateSettings('font', f.id)}
-                                                            className={`w-full p-3 rounded-lg border text-left flex justify-between items-center ${state.settings.font === f.id ? 'border-blue-500 bg-blue-50 dark:bg-slate-800' : 'border-gray-200 dark:border-slate-700'}`}
-                                                        >
+                                                        <button key={f.id} onClick={() => updateSettings('font', f.id)}
+                                                            className={`w-full p-3 rounded-lg border text-left flex justify-between items-center ${state.settings.font === f.id ? 'border-blue-500 bg-blue-50 dark:bg-slate-800' : 'border-gray-200 dark:border-slate-700'}`}>
                                                             <span style={{fontFamily:f.name}}>{f.name}</span>
                                                             {state.settings.font === f.id && <i className="fas fa-check text-blue-500"></i>}
                                                         </button>
@@ -1338,31 +541,23 @@
                                         <motion.div key="settings" initial={{opacity:0, x:20}} animate={{opacity:1, x:0}} exit={{opacity:0, x:-20}} className="space-y-6">
                                             <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
                                                 <h3 className="font-bold mb-4">{isAr ? 'إعدادات الصفحة' : 'Mise en page'}</h3>
-
                                                 <div className="mb-4">
                                                     <label className="block text-xs font-bold text-gray-500 mb-2">{text.fontSize}</label>
                                                     <div className="flex bg-gray-100 dark:bg-slate-900 rounded-lg p-1">
                                                         {['small', 'medium', 'large'].map(size => (
-                                                            <button 
-                                                                key={size}
-                                                                onClick={() => updateSettings('fontSize', size)}
-                                                                className={`flex-1 py-1 rounded-md text-sm capitalize ${state.settings.fontSize === size ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-gray-500'}`}
-                                                            >
+                                                            <button key={size} onClick={() => updateSettings('fontSize', size)}
+                                                                className={`flex-1 py-1 rounded-md text-sm capitalize ${state.settings.fontSize === size ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-gray-500'}`}>
                                                                 {size === 'small' ? (isAr ? 'صغير' : 'Petit') : size === 'medium' ? (isAr ? 'متوسط' : 'Moyen') : (isAr ? 'كبير' : 'Grand')}
                                                             </button>
                                                         ))}
                                                     </div>
                                                 </div>
-
                                                 <div className="mb-4">
                                                     <label className="block text-xs font-bold text-gray-500 mb-2">{text.spacing}</label>
                                                     <div className="flex bg-gray-100 dark:bg-slate-900 rounded-lg p-1">
                                                         {['compact', 'normal', 'spacious'].map(s => (
-                                                            <button 
-                                                                key={s}
-                                                                onClick={() => updateSettings('spacing', s)}
-                                                                className={`flex-1 py-1 rounded-md text-sm capitalize ${state.settings.spacing === s ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-gray-500'}`}
-                                                            >
+                                                            <button key={s} onClick={() => updateSettings('spacing', s)}
+                                                                className={`flex-1 py-1 rounded-md text-sm capitalize ${state.settings.spacing === s ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-gray-500'}`}>
                                                                 {s === 'compact' ? (isAr ? 'ضيق' : 'Compact') : s === 'normal' ? (isAr ? 'عادي' : 'Normal') : (isAr ? 'واسع' : 'Aéré')}
                                                             </button>
                                                         ))}
@@ -1392,23 +587,6 @@
                             </div>
                         </div>
                     </div>
-
-                    {/* Preview Modal */}
-                    <AnimatePresence>
-                        {showPreviewModal && previewTemplate && (
-                            <motion.div 
-                                initial={{opacity:0}} 
-                                animate={{opacity:1}} 
-                                exit={{opacity:0}}
-                            >
-                                <TemplatePreviewModal 
-                                    template={previewTemplate} 
-                                    onClose={() => setShowPreviewModal(false)}
-                                    onSelect={(id) => updateSettings('template', id)}
-                                />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
                 </AppContext.Provider>
             );
         };
