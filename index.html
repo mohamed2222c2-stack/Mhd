@@ -1,568 +1,772 @@
-```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دارجة تيوب • DarjaTube Learner</title>
-    <!-- Tailwind CSS للستايليست -->
+    <title>ProCV - منشئ السير الذاتية الاحترافي</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons للأيقونات -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- خطوط جوجل -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Inter:wght@300;400;500;600;700&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Tajawal', 'sans-serif'],
+                        ar: ['Tajawal', 'sans-serif'],
+                        fr: ['Inter', 'sans-serif'],
+                        cairo: ['Cairo', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', 'Tajawal', sans-serif;
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* A4 Paper Simulation */
+        .a4-paper {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Print Styles */
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
+            .no-print { display: none !important; }
+        }
+
+        /* RTL/LTR Transitions */
+        .direction-transition { transition: all 0.3s ease; }
+        
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .dark .glass {
+            background: rgba(30, 41, 59, 0.7);
         }
     </style>
 </head>
-<body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500/30 selection:text-emerald-300">
+<body class="bg-gray-50 text-gray-800 dark:bg-slate-900 dark:text-gray-100 transition-colors duration-300 font-ar overflow-hidden h-screen flex flex-col">
 
-    <div id="app" class="flex flex-col min-h-screen">
-        <!-- سيتم بناء واجهة التطبيق هنا ديناميكياً بواسطة JavaScript -->
-    </div>
+    <div id="root" class="h-full w-full"></div>
 
-    <!-- كود التشغيل الرئيسي بالتفصيل -->
-    <script>
-        // إعدادات المفتاح (يمكنك وضعه هنا ليشتغل التوليد بالذكاء الاصطناعي)
-        const apiKey = ""; 
+    <script type="text/babel">
+        const { useState, useEffect, useRef, createContext, useContext } = React;
+        const { motion, AnimatePresence } = window.Motion;
 
-        // البيانات الافتراضية للفيديوهات
-        const MOCK_VIDEOS = [
-          {
-            id: "frog-song",
-            youtubeId: "WfKWe8MvI6U",
-            title: "The Happy Frog - Learn English & Darija",
-            language: "English",
-            transcript: [
-              { id: 1, start: 0, end: 4, text: "I jump really high.", translation: "كنقز عالي بزاف.", words: [
-                { word: "I", translation: "أنا", pronunciation: "آي" },
-                { word: "jump", translation: "كنقز / أقفز", pronunciation: "جامب" },
-                { word: "really", translation: "بزاف / حقاً", pronunciation: "ريلي" },
-                { word: "high", translation: "عالي / مرتفع", pronunciation: "هاي" }
-              ]},
-              { id: 2, start: 4, end: 8, text: "But you cannot fly.", translation: "ولكن ما كتقدرش تطير.", words: [
-                { word: "But", translation: "ولكن", pronunciation: "بات" },
-                { word: "you", translation: "أنت", pronunciation: "يو" },
-                { word: "cannot", translation: "ما كتقدرش", pronunciation: "كانوت" },
-                { word: "fly", translation: "تطير", pronunciation: "فلاي" }
-              ]},
-              { id: 3, start: 8, end: 11, text: "Hmm. Yes, I can fly.", translation: "همم. إيه، نقدر نطير.", words: [
-                { word: "Hmm", translation: "همم (للتفكير)", pronunciation: "همم" },
-                { word: "Yes", translation: "إيه / نعم", pronunciation: "ييس" },
-                { word: "I", translation: "أنا", pronunciation: "آي" },
-                { word: "can", translation: "نقدر / أستطيع", pronunciation: "كان" },
-                { word: "fly", translation: "نطير", pronunciation: "فلاي" }
-              ]},
-              { id: 4, start: 11, end: 15, text: "Let's make a bet.", translation: "يلاه نديرو رهان.", words: [
-                { word: "Let's", translation: "يلاه / دعنا", pronunciation: "لتس" },
-                { word: "make", translation: "نديرو", pronunciation: "ميك" },
-                { word: "a", translation: "أداة نكرة", pronunciation: "إي" },
-                { word: "bet", translation: "رهان", pronunciation: "بيت" }
-              ]}
-            ]
-          },
-          {
-            id: "friends-scene",
-            youtubeId: "vN-1_In7XpM",
-            title: "English Conversations - Greetings",
-            language: "English",
-            transcript: [
-              { id: 1, start: 0, end: 3, text: "How are you doing today?", translation: "كيف داير اليوم؟", words: [
-                { word: "How", translation: "كيفاش", pronunciation: "هاو" },
-                { word: "are", translation: "تكون", pronunciation: "آر" },
-                { word: "you", translation: "أنت", pronunciation: "يو" },
-                { word: "doing", translation: "داير", pronunciation: "دوينغ" },
-                { word: "today", translation: "اليوم", pronunciation: "توداي" }
-              ]},
-              { id: 2, start: 3, end: 6, text: "I am doing great, thank you.", translation: "أنا بخير بزاف، شكراً ليك.", words: [
-                { word: "I", translation: "أنا", pronunciation: "آي" },
-                { word: "am", translation: "أكون", pronunciation: "أَم" },
-                { word: "doing", translation: "بصحة", pronunciation: "دوينغ" },
-                { word: "great", translation: "رائع", pronunciation: "غريت" },
-                { word: "thank", translation: "أشكر", pronunciation: "ثانك" },
-                { word: "you", translation: "أنت", pronunciation: "يو" }
-              ]}
-            ]
-          }
+        // --- Data & Constants ---
+        const INITIAL_DATA = {
+            lang: 'ar', // 'ar' or 'fr'
+            personal: {
+                firstName: '',
+                lastName: '',
+                title: '',
+                email: '',
+                phone: '',
+                address: '',
+                city: '',
+                country: '',
+                linkedin: '',
+                website: '',
+                summary: '',
+                photo: null
+            },
+            sections: {
+                experience: [],
+                education: [],
+                skills: [],
+                languages: [],
+                courses: [],
+                projects: [],
+                hobbies: []
+            },
+            settings: {
+                template: 'modern',
+                color: '#2563eb',
+                font: 'tajawal',
+                fontSize: 'medium',
+                spacing: 'normal',
+                direction: 'rtl'
+            }
+        };
+
+        const TEMPLATES = [
+            { id: 'modern', name: 'عصري', category: 'general' },
+            { id: 'classic', name: 'كلاسيكي', category: 'general' },
+            { id: 'minimal', name: 'بسيط', category: 'creative' },
+            { id: 'sidebar', name: 'جانبي', category: 'professional' },
+            { id: 'bold', name: 'جريء', category: 'creative' },
+            { id: 'elegant', name: 'أنيق', category: 'professional' },
+            { id: 'tech', name: 'تقني', category: 'tech' },
+            { id: 'executive', name: 'إداري', category: 'professional' },
         ];
 
-        // حالة التطبيق الراهنة (State)
-        let currentVideo = MOCK_VIDEOS[0];
-        let currentTime = 0;
-        let isPlaying = false;
-        let playbackRate = 1;
-        let activeWord = null;
-        let loopMode = false;
-        let activeSentenceId = 1;
-        let isGenerating = false;
-        let player = null;
-        let progressInterval = null;
+        const COLORS = [
+            '#2563eb', '#dc2626', '#059669', '#d97706', '#7c3aed', '#db2777', '#0891b2', '#4338ca', '#000000'
+        ];
 
-        // تحميل مكتبة اليوتيوب
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        const FONTS = [
+            { id: 'tajawal', name: 'Tajawal' },
+            { id: 'cairo', name: 'Cairo' },
+            { id: 'inter', name: 'Inter' }
+        ];
 
-        window.onYouTubeIframeAPIReady = () => {
-            initPlayer(currentVideo.youtubeId);
+        const SECTION_TYPES = [
+            { id: 'experience', labelAr: 'الخبرات المهنية', labelFr: 'Expériences', icon: 'fa-briefcase' },
+            { id: 'education', labelAr: 'التعليم', labelFr: 'Éducation', icon: 'fa-graduation-cap' },
+            { id: 'skills', labelAr: 'المهارات', labelFr: 'Compétences', icon: 'fa-tools' },
+            { id: 'languages', labelAr: 'اللغات', labelFr: 'Langues', icon: 'fa-language' },
+            { id: 'courses', labelAr: 'الدورات', labelFr: 'Formations', icon: 'fa-certificate' },
+            { id: 'projects', labelAr: 'المشاريع', labelFr: 'Projets', icon: 'fa-project-diagram' },
+            { id: 'hobbies', labelAr: 'الهوايات', labelFr: 'Loisirs', icon: 'fa-heart' }
+        ];
+
+        // --- Context ---
+        const AppContext = createContext();
+
+        // --- Components ---
+
+        // 1. Input Components
+        const InputField = ({ label, value, onChange, type = "text", placeholder, area = false }) => {
+            const baseClass = "w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all";
+            
+            return (
+                <div className="mb-4">
+                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">{label}</label>
+                    {area ? (
+                        <textarea 
+                            className={`${baseClass} min-h-[100px] resize-y`} 
+                            value={value} 
+                            onChange={(e) => onChange(e.target.value)} 
+                            placeholder={placeholder}
+                        />
+                    ) : (
+                        <input 
+                            type={type} 
+                            className={baseClass} 
+                            value={value} 
+                            onChange={(e) => onChange(e.target.value)} 
+                            placeholder={placeholder}
+                        />
+                    )}
+                </div>
+            );
         };
 
-        function initPlayer(videoId) {
-            if (player) {
-                try { player.destroy(); } catch(e) {}
-            }
-            player = new YT.Player('youtube-iframe', {
-                videoId: videoId,
-                playerVars: {
-                    playsinline: 1,
-                    controls: 0,
-                    disablekb: 1,
-                    modestbranding: 1,
-                    rel: 0
-                },
-                events: {
-                    onReady: () => {
-                        isPlaying = false;
-                        updateControlsUI();
-                    },
-                    onStateChange: (event) => {
-                        if (event.data === YT.PlayerState.PLAYING) {
-                            isPlaying = true;
-                            startTracking();
-                        } else {
-                            isPlaying = false;
-                            clearInterval(progressInterval);
-                        }
-                        updateControlsUI();
-                    }
-                }
-            });
-        }
+        // 2. Section Editor
+        const SectionEditor = ({ type, data, onChange, onDelete }) => {
+            const { state } = useContext(AppContext);
+            const isAr = state.lang === 'ar';
+            const labels = SECTION_TYPES.find(s => s.id === type);
 
-        function startTracking() {
-            clearInterval(progressInterval);
-            progressInterval = setInterval(() => {
-                if (player && typeof player.getCurrentTime === 'function') {
-                    const time = player.getCurrentTime();
-                    currentTime = time;
-                    
-                    const currentSentence = currentVideo.transcript.find(s => time >= s.start && time <= s.end);
-                    if (currentSentence) {
-                        activeSentenceId = currentSentence.id;
-                        highlightSentence(currentSentence.id);
-                        
-                        if (loopMode && time >= currentSentence.end - 0.2) {
-                            player.seekTo(currentSentence.start);
-                        }
-                    }
-                }
-            }, 100);
-        }
-
-        // بناء وتحديث واجهة المستخدم الرئيسية
-        function renderApp() {
-            const app = document.getElementById('app');
-            app.innerHTML = `
-                <!-- البار العلوي -->
-                <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50 px-4 py-3">
-                    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div class="flex items-center gap-3">
-                            <div class="p-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/30 text-emerald-400 shadow-lg shadow-emerald-500/5">
-                                <i data-lucide="languages" class="w-6 h-6"></i>
-                            </div>
-                            <div>
-                                <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-                                    دارجة تيوب • DarjaTube Learner
-                                </h1>
-                                <p class="text-xs text-slate-400 font-medium text-right">تعلم اللغات بنقرة زر وحدة من فيديوهات اليوتيوب</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs text-slate-400 font-medium">أمثلة:</span>
-                            ${MOCK_VIDEOS.map(v => `
-                                <button onclick="selectVideo('${v.id}')" class="text-xs px-3 py-1.5 rounded-lg border transition-all duration-300 ${currentVideo.id === v.id ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400 font-semibold' : 'border-slate-800 hover:border-slate-700 text-slate-300'}">
-                                    ${v.title.split('-')[0]}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-                </header>
-
-                <!-- المحتوى الرئيسي -->
-                <main class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    
-                    <!-- اليسار: الإدخال واللاعب -->
-                    <section class="lg:col-span-7 flex flex-col gap-6">
-                        
-                        <!-- صندوق الرابط -->
-                        <div class="bg-slate-900/80 border border-slate-800/60 rounded-2xl p-4 shadow-xl">
-                            <h3 class="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
-                                <i data-lucide="sparkles" class="w-4 h-4 text-emerald-400"></i>
-                                أدخل رابط فيديو يوتيوب لتحليله بالذكاء الاصطناعي:
-                            </h3>
-                            <div class="flex gap-2">
-                                <input type="text" id="yt-url" placeholder="https://www.youtube.com/watch?v=..." class="flex-1 bg-slate-950/80 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 text-slate-200 placeholder:text-slate-500 text-left" dir="ltr" />
-                                <button onclick="generateTranscript()" id="gen-btn" class="bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-slate-950 px-5 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shrink-0">
-                                    <i data-lucide="sparkles" class="w-4 h-4"></i>
-                                    <span>تحليل النص</span>
-                                </button>
-                            </div>
-                            <div id="status-msg" class="mt-2 hidden text-xs p-3 rounded-lg"></div>
-                        </div>
-
-                        <!-- المشغل -->
-                        <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl relative">
-                            <div class="aspect-video bg-black w-full relative">
-                                <div id="youtube-iframe" class="w-full h-full"></div>
-                            </div>
-                            <div class="p-4 bg-slate-950/90 border-t border-slate-800/80 flex items-center justify-between flex-wrap gap-4">
-                                <div class="flex items-center gap-2">
-                                    <button id="play-btn" onclick="togglePlay()" class="w-12 h-12 rounded-full bg-emerald-500 text-slate-950 hover:scale-105 active:scale-95 transition-all flex items-center justify-center">
-                                        <i data-lucide="play" class="w-5 h-5 fill-slate-950"></i>
-                                    </button>
-                                    <button onclick="player.seekTo(0)" class="p-3 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-xl transition">
-                                        <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
-                                    </button>
-                                </div>
-
-                                <div class="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-850">
-                                    <button onclick="setRate(1)" class="rate-btn px-3 py-1.5 rounded-lg text-xs font-bold transition ${playbackRate === 1 ? 'bg-emerald-500 text-slate-950' : 'text-slate-400'}">1×</button>
-                                    <button onclick="setRate(1.25)" class="rate-btn px-3 py-1.5 rounded-lg text-xs font-bold transition ${playbackRate === 1.25 ? 'bg-emerald-500 text-slate-950' : 'text-slate-400'}">1.25×</button>
-                                    <button onclick="setRate(1.5)" class="rate-btn px-3 py-1.5 rounded-lg text-xs font-bold transition ${playbackRate === 1.5 ? 'bg-emerald-500 text-slate-950' : 'text-slate-400'}">1.5×</button>
-                                </div>
-
-                                <button onclick="toggleLoop()" id="loop-btn" class="px-4 py-2 rounded-xl text-xs font-bold border border-slate-800 text-slate-400 hover:bg-slate-800 flex items-center gap-2">
-                                    <span id="loop-dot" class="w-2 h-2 rounded-full bg-slate-600"></span>
-                                    تكرار السطر الحالي
-                                </button>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- اليمين: الترجمة والكلمات التفاعلية -->
-                    <section class="lg:col-span-5 flex flex-col gap-6">
-                        <!-- صندوق تفاصيل الكلمة المحددة -->
-                        <div id="word-details" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl min-h-[160px] flex flex-col justify-center">
-                            <div class="text-center text-slate-500 py-4 flex flex-col items-center">
-                                <i data-lucide="help-circle" class="w-10 h-10 text-slate-600 mb-2"></i>
-                                <p class="text-sm">برك على شي كلمة من النص التفاعلي التحت باش تبان الترجمة والنطق هنا.</p>
-                            </div>
-                        </div>
-
-                        <!-- قائمة السطور الكاملة -->
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col flex-1">
-                            <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
-                                <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
-                                    <i data-lucide="globe" class="w-4 h-4 text-emerald-400"></i>
-                                    النص التفاعلي المتزامن
-                                </h3>
-                            </div>
-                            <div id="transcript-list" class="flex flex-col gap-4 overflow-y-auto max-h-[400px]">
-                                <!-- سيتم ملؤه ديناميكياً -->
-                            </div>
-                        </div>
-                    </section>
-                </main>
-            `;
-            lucide.createIcons();
-            renderTranscript();
-        }
-
-        // ريندر النصوص التفاعلية
-        function renderTranscript() {
-            const list = document.getElementById('transcript-list');
-            if (!list) return;
-
-            list.innerHTML = currentVideo.transcript.map(sentence => {
-                const isActive = activeSentenceId === sentence.id;
-                
-                // تقسيم الكلمات لأزرار تفاعلية
-                const wordsHTML = sentence.text.split(" ").map(rawWord => {
-                    const cleanWord = rawWord.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
-                    const wordObj = sentence.words.find(w => w.word.toLowerCase() === cleanWord.toLowerCase()) || { word: cleanWord, translation: "غير متوفرة", pronunciation: "" };
-                    
-                    return `
-                        <button onclick='selectWord(${JSON.stringify(wordObj).replace(/'/g, "&apos;")})' class="px-2 py-1 rounded-md text-base md:text-lg font-medium hover:bg-emerald-500/20 text-slate-300 transition-all duration-150">
-                            ${rawWord}
-                        </button>
-                    `;
-                }).join('');
-
-                return `
-                    <div id="sentence-${sentence.id}" class="sentence-box p-4 rounded-xl transition-all duration-300 border ${isActive ? 'bg-emerald-950/30 border-emerald-500/40 shadow-emerald-500/5' : 'bg-slate-950/30 border-slate-850'}">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10px] font-mono text-slate-500">${Math.floor(sentence.start)}s - ${Math.floor(sentence.end)}s</span>
-                            <button onclick="seekTo(${sentence.start})" class="text-xs text-emerald-400 flex items-center gap-1 font-semibold">
-                                تشغيل هاد المقطع <i data-lucide="chevron-left" class="w-3 h-3"></i>
-                            </button>
-                        </div>
-                        <div class="flex flex-wrap gap-1.5 mb-2.5">
-                            ${wordsHTML}
-                        </div>
-                        <p class="text-sm leading-relaxed border-t border-slate-800/50 pt-2 text-right ${isActive ? 'text-emerald-300 font-medium' : 'text-slate-400'}">
-                            ${sentence.translation}
-                        </p>
-                    </div>
-                `;
-            }).join('');
-            lucide.createIcons();
-        }
-
-        function highlightSentence(id) {
-            document.querySelectorAll('.sentence-box').forEach(box => {
-                box.classList.remove('bg-emerald-950/30', 'border-emerald-500/40');
-                box.classList.add('bg-slate-950/30', 'border-slate-850');
-            });
-            const activeBox = document.getElementById(`sentence-${id}`);
-            if (activeBox) {
-                activeBox.classList.add('bg-emerald-950/30', 'border-emerald-500/40');
-                activeBox.classList.remove('bg-slate-950/30', 'border-slate-850');
-            }
-        }
-
-        function selectVideo(id) {
-            const v = MOCK_VIDEOS.find(video => video.id === id);
-            if (v) {
-                currentVideo = v;
-                renderApp();
-                initPlayer(v.youtubeId);
-            }
-        }
-
-        function togglePlay() {
-            if (!player) return;
-            if (isPlaying) {
-                player.pauseVideo();
-            } else {
-                player.playVideo();
-            }
-        }
-
-        function updateControlsUI() {
-            const btn = document.getElementById('play-btn');
-            if (btn) {
-                btn.innerHTML = isPlaying 
-                    ? '<i data-lucide="pause" class="w-5 h-5 fill-slate-950"></i>' 
-                    : '<i data-lucide="play" class="w-5 h-5 fill-slate-950"></i>';
-                lucide.createIcons();
-            }
-        }
-
-        function setRate(rate) {
-            playbackRate = rate;
-            if (player && typeof player.setPlaybackRate === 'function') {
-                player.setPlaybackRate(rate);
-            }
-            document.querySelectorAll('.rate-btn').forEach(b => {
-                b.classList.remove('bg-emerald-500', 'text-slate-950');
-                b.classList.add('text-slate-400');
-            });
-            event.target.classList.add('bg-emerald-500', 'text-slate-950');
-        }
-
-        function toggleLoop() {
-            loopMode = !loopMode;
-            const dot = document.getElementById('loop-dot');
-            const btn = document.getElementById('loop-btn');
-            if (loopMode) {
-                dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
-                btn.className = "px-4 py-2 rounded-xl text-xs font-bold border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 flex items-center gap-2";
-            } else {
-                dot.className = "w-2 h-2 rounded-full bg-slate-600";
-                btn.className = "px-4 py-2 rounded-xl text-xs font-bold border border-slate-800 text-slate-400 hover:bg-slate-800 flex items-center gap-2";
-            }
-        }
-
-        function seekTo(time) {
-            if (player) {
-                player.seekTo(time, true);
-                player.playVideo();
-            }
-        }
-
-        function selectWord(wordObj) {
-            activeWord = wordObj;
-            const box = document.getElementById('word-details');
-            box.innerHTML = `
-                <div class="relative z-10">
-                    <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-3">
-                        <div>
-                            <span class="text-xs text-emerald-400 font-bold uppercase">الكلمة المحددة</span>
-                            <h2 class="text-3xl font-extrabold text-white tracking-wide mt-1">${wordObj.word}</h2>
-                        </div>
-                        <button onclick="speakWord('${wordObj.word}')" id="speak-btn" class="p-3 bg-emerald-500 text-slate-950 hover:bg-emerald-400 rounded-xl transition flex items-center justify-center">
-                            <i data-lucide="volume-2" class="w-5 h-5"></i>
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mt-3">
-                        <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/50">
-                            <span class="text-[10px] text-slate-400 block mb-1">الترجمة بالدارجة</span>
-                            <span class="text-lg font-bold text-emerald-300">${wordObj.translation}</span>
-                        </div>
-                        <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/50">
-                            <span class="text-[10px] text-slate-400 block mb-1">النطق بالتقريب</span>
-                            <span class="text-lg font-bold text-teal-300">${wordObj.pronunciation}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            lucide.createIcons();
-        }
-
-        // نطق الكلمة باستعمال Gemini TTS
-        async function speakWord(text) {
-            const btn = document.getElementById('speak-btn');
-            btn.innerHTML = `<div class="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>`;
-            
-            const payload = {
-                contents: [{ parts: [{ text: `Say clearly: ${text}` }] }],
-                generationConfig: {
-                    responseModalities: ["AUDIO"],
-                    speechConfig: {
-                        voiceConfig: {
-                            prebuiltVoiceConfig: { voiceName: "Kore" }
-                        }
-                    }
-                },
-                model: "gemini-2.5-flash-preview-tts"
+            const handleChange = (index, field, value) => {
+                const newData = [...data];
+                newData[index] = { ...newData[index], [field]: value };
+                onChange(newData);
             };
 
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-                const base64 = result.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-                
-                if (base64) {
-                    playWavFromPCM(base64);
-                }
-            } catch (err) {
-                console.error("Error with voice output:", err);
-            } finally {
-                btn.innerHTML = `<i data-lucide="volume-2" class="w-5 h-5"></i>`;
-                lucide.createIcons();
-            }
-        }
+            const addItem = () => {
+                const newItem = type === 'skills' || type === 'hobbies' ? { name: '' } :
+                                type === 'languages' ? { name: '', level: '' } :
+                                { title: '', subtitle: '', date: '', description: '' };
+                onChange([...data, newItem]);
+            };
 
-        function playWavFromPCM(base64Data) {
-            const binaryString = window.atob(base64Data);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            const wavHeader = new ArrayBuffer(44);
-            const view = new DataView(wavHeader);
-            view.setUint32(0, 0x52494646, false);
-            view.setUint32(4, 36 + len, true);
-            view.setUint32(8, 0x57415645, false);
-            view.setUint32(12, 0x666d7420, false);
-            view.setUint32(16, 16, true);
-            view.setUint16(20, 1, true);
-            view.setUint16(22, 1, true);
-            view.setUint32(24, 24000, true);
-            view.setUint32(28, 24000 * 2, true);
-            view.setUint16(32, 2, true);
-            view.setUint16(34, 16, true);
-            view.setUint32(36, 0x64617461, false);
-            view.setUint32(40, len, true);
-            
-            const blob = new Blob([wavHeader, bytes], { type: 'audio/wav' });
-            const audioUrl = URL.createObjectURL(blob);
-            new Audio(audioUrl).play();
-        }
+            const removeItem = (index) => {
+                const newData = data.filter((_, i) => i !== index);
+                onChange(newData);
+            };
 
-        // استخراج كود الفيديو
-        function extractId(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
-        }
+            return (
+                <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-slate-700 mb-6">
+                    <div className="flex justify-between items-center mb-4 border-b border-gray-100 dark:border-slate-700 pb-2">
+                        <h3 className="font-bold text-lg flex items-center gap-2">
+                            <i className={`fas ${labels.icon} text-primary-500`}></i>
+                            {isAr ? labels.labelAr : labels.labelFr}
+                        </h3>
+                        <button onClick={onDelete} className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-2 rounded-full transition-colors">
+                            <i className="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
 
-        // توليد النص باستدعاء الذكاء الاصطناعي
-        async function generateTranscript() {
-            const urlInput = document.getElementById('yt-url').value;
-            const videoId = extractId(urlInput);
-            const msg = document.getElementById('status-msg');
-            const btn = document.getElementById('gen-btn');
+                    <div className="space-y-4">
+                        {data.map((item, index) => (
+                            <motion.div 
+                                key={index} 
+                                initial={{ opacity: 0, y: 10 }} 
+                                animate={{ opacity: 1, y: 0 }}
+                                className="relative bg-gray-50 dark:bg-slate-900/50 p-4 rounded-lg border border-gray-200 dark:border-slate-700 group"
+                            >
+                                <button onClick={() => removeItem(index)} className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity">
+                                    <i className="fas fa-times"></i>
+                                </button>
+                                
+                                {type === 'skills' || type === 'hobbies' ? (
+                                    <InputField 
+                                        label={isAr ? 'المهارة / الهواية' : 'Compétence / Loisir'} 
+                                        value={item.name} 
+                                        onChange={(v) => handleChange(index, 'name', v)} 
+                                    />
+                                ) : type === 'languages' ? (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <InputField label={isAr ? 'اللغة' : 'Langue'} value={item.name} onChange={(v) => handleChange(index, 'name', v)} />
+                                        <InputField label={isAr ? 'المستوى' : 'Niveau'} value={item.level} onChange={(v) => handleChange(index, 'level', v)} />
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <InputField label={isAr ? 'العنوان / المنصب' : 'Titre / Poste'} value={item.title} onChange={(v) => handleChange(index, 'title', v)} />
+                                            <InputField label={isAr ? 'المؤسسة' : 'Institution'} value={item.subtitle} onChange={(v) => handleChange(index, 'subtitle', v)} />
+                                        </div>
+                                        <InputField label={isAr ? 'التاريخ' : 'Date'} value={item.date} onChange={(v) => handleChange(index, 'date', v)} placeholder="2020 - 2024" />
+                                        <InputField label={isAr ? 'الوصف' : 'Description'} area={true} value={item.description} onChange={(v) => handleChange(index, 'description', v)} />
+                                    </div>
+                                )}
+                            </motion.div>
+                        ))}
+                    </div>
 
-            if (!videoId) {
-                msg.className = "mt-2 text-xs p-3 rounded-lg bg-rose-500/10 text-rose-400 block";
-                msg.innerHTML = "عافاك دخل رابط يوتيوب صحيح.";
-                return;
-            }
-
-            msg.className = "mt-2 text-xs p-3 rounded-lg bg-emerald-500/10 text-emerald-400 block";
-            msg.innerHTML = "جاري الاتصال والتحليل بالذكاء الاصطناعي...";
-            btn.disabled = true;
-
-            const systemPrompt = `You are an expert language teacher. Transcribe this YouTube video to learn English. Output STRICTLY a JSON object matching this schema:
-            {
-              "title": "String",
-              "transcript": [
-                {
-                  "id": 1,
-                  "start": 0,
-                  "end": 4,
-                  "text": "Clean English Sentence",
-                  "translation": "Moroccan Darija translation",
-                  "words": [{"word": "word", "translation": "Darija translation", "pronunciation": "Pronunciation in Arabic letters"}]
-                }
-              ]
-            }`;
-
-            const userPrompt = `Generate a 4-sentence transcript for Video ID: ${videoId}. Ensure the timelines start from 0 to 20 seconds.`;
-
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: userPrompt }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] },
-                        generationConfig: { responseMimeType: "application/json" }
-                    })
-                });
-                
-                const data = await response.json();
-                const content = JSON.parse(data.candidates[0].content.parts[0].text);
-
-                if (content && content.transcript) {
-                    currentVideo = {
-                        id: videoId,
-                        youtubeId: videoId,
-                        title: content.title || "تم الاستيراد بنجاح",
-                        language: "English",
-                        transcript: content.transcript
-                    };
-                    renderApp();
-                    initPlayer(videoId);
-                    msg.innerHTML = "تم جلب النص بنجاح!";
-                }
-            } catch(e) {
-                msg.className = "mt-2 text-xs p-3 rounded-lg bg-rose-500/10 text-rose-400 block";
-                msg.innerHTML = "وقع خطأ فالتوليد. يرجى التأكد من الـ API Key وإعادة المحاولة.";
-                console.error(e);
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
-        // التشغيل الأولي
-        window.onload = () => {
-            renderApp();
+                    <button 
+                        onClick={addItem} 
+                        className="mt-4 w-full py-2 border-2 border-dashed border-gray-300 dark:border-slate-600 text-gray-500 dark:text-gray-400 rounded-lg hover:border-primary-500 hover:text-primary-500 transition-colors flex items-center justify-center gap-2 font-medium"
+                    >
+                        <i className="fas fa-plus"></i> {isAr ? 'إضافة جديد' : 'Ajouter'}
+                    </button>
+                </div>
+            );
         };
+
+        // 3. Resume Preview (The complex part)
+        const ResumePreview = () => {
+            const { state } = useContext(AppContext);
+            const { personal, sections, settings } = state;
+            const isAr = settings.direction === 'rtl';
+            
+            // Dynamic Styles based on settings
+            const fontClass = settings.font === 'cairo' ? 'font-cairo' : settings.font === 'inter' ? 'font-fr' : 'font-ar';
+            const textSize = settings.fontSize === 'small' ? 'text-[13px]' : settings.fontSize === 'large' ? 'text-[15px]' : 'text-[14px]';
+            const lineSpacing = settings.spacing === 'compact' ? 'leading-snug' : settings.spacing === 'spacious' ? 'leading-loose' : 'leading-normal';
+            
+            const colorStyle = { color: settings.color };
+            const bgStyle = { backgroundColor: settings.color };
+            
+            // Helper to render sections
+            const renderSection = (id) => {
+                const data = sections[id];
+                if (!data || data.length === 0) return null;
+                const meta = SECTION_TYPES.find(s => s.id === id);
+                const title = isAr ? meta.labelAr : meta.labelFr;
+
+                // Different rendering based on template
+                if (settings.template === 'modern') {
+                    return (
+                        <div className="mb-5">
+                            <h3 className="text-lg font-bold uppercase tracking-wider mb-3 border-b-2 pb-1" style={{ borderColor: settings.color, color: settings.color }}>{title}</h3>
+                            <div className="space-y-3">
+                                {data.map((item, i) => (
+                                    <div key={i}>
+                                        {item.title && <div className="font-bold text-gray-800">{item.title}</div>}
+                                        {item.subtitle && <div className="text-sm text-gray-600 italic">{item.subtitle}</div>}
+                                        {item.date && <div className="text-xs text-gray-500 font-mono mb-1">{item.date}</div>}
+                                        {item.description && <div className="text-sm text-gray-700 whitespace-pre-line">{item.description}</div>}
+                                        {item.name && <div className="inline-block bg-gray-100 rounded px-2 py-1 text-xs mr-2 mb-2">{item.name}</div>}
+                                        {item.level && <div className="text-sm">{item.name} - <span className="text-gray-500">{item.level}</span></div>}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                } else if (settings.template === 'sidebar') {
+                    // Sidebar logic is handled in the main wrapper
+                    return null; 
+                } else {
+                    // Classic/Default
+                    return (
+                        <div className="mb-4">
+                            <h3 className="font-bold text-lg mb-2 border-b pb-1" style={{ color: settings.color }}>{title}</h3>
+                            <div className="space-y-2">
+                                {data.map((item, i) => (
+                                    <div key={i} className="grid grid-cols-12 gap-2">
+                                        {(item.date) && <div className="col-span-3 text-xs text-gray-500 font-mono pt-1">{item.date}</div>}
+                                        <div className={item.date ? "col-span-9" : "col-span-12"}>
+                                            {item.title && <div className="font-bold text-gray-900">{item.title}</div>}
+                                            {item.subtitle && <div className="text-sm text-gray-700">{item.subtitle}</div>}
+                                            {item.description && <div className="text-sm text-gray-600 mt-1 whitespace-pre-line">{item.description}</div>}
+                                            {item.name && <span className="text-sm text-gray-700 block">• {item.name}</span>}
+                                            {item.level && <div className="text-sm flex justify-between"><span>{item.name}</span> <span className="text-gray-500">{item.level}</span></div>}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                }
+            };
+
+            // Template Wrappers
+            const getLayout = () => {
+                const activeSections = Object.keys(sections).filter(key => sections[key].length > 0);
+                
+                if (settings.template === 'sidebar') {
+                    return (
+                        <div className="flex h-full">
+                            <div className="w-1/3 p-6 text-white" style={{ backgroundColor: settings.color }}>
+                                {personal.photo && <img src={personal.photo} className="w-32 h-32 rounded-full object-cover mx-auto mb-4 border-4 border-white/30" />}
+                                <div className="mb-6">
+                                    <h2 className="text-xl font-bold uppercase mb-4 border-b border-white/30 pb-2">{isAr ? 'معلومات الاتصال' : 'Contact'}</h2>
+                                    <div className="space-y-2 text-sm opacity-90">
+                                        {personal.phone && <div><i className="fas fa-phone mr-2"></i>{personal.phone}</div>}
+                                        {personal.email && <div><i className="fas fa-envelope mr-2"></i>{personal.email}</div>}
+                                        {personal.address && <div><i className="fas fa-map-marker-alt mr-2"></i>{personal.address}</div>}
+                                    </div>
+                                </div>
+                                {activeSections.includes('skills') && (
+                                    <div className="mb-6">
+                                        <h2 className="text-xl font-bold uppercase mb-4 border-b border-white/30 pb-2">{isAr ? 'المهارات' : 'Compétences'}</h2>
+                                        <div className="flex flex-wrap gap-2">
+                                            {sections.skills.map((s, i) => <span key={i} className="bg-white/20 px-2 py-1 rounded text-xs">{s.name}</span>)}
+                                        </div>
+                                    </div>
+                                )}
+                                {activeSections.includes('languages') && (
+                                    <div className="mb-6">
+                                        <h2 className="text-xl font-bold uppercase mb-4 border-b border-white/30 pb-2">{isAr ? 'اللغات' : 'Langues'}</h2>
+                                        {sections.languages.map((l, i) => <div key={i} className="mb-1 text-sm">{l.name} <span className="opacity-70 text-xs">({l.level})</span></div>)}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="w-2/3 p-8 bg-white text-gray-800">
+                                <h1 className="text-4xl font-bold mb-2" style={{ color: settings.color }}>{personal.firstName} {personal.lastName}</h1>
+                                <div className="text-xl text-gray-600 mb-6 uppercase tracking-wide">{personal.title}</div>
+                                {personal.summary && <div className="mb-6 text-gray-600 leading-relaxed">{personal.summary}</div>}
+                                
+                                {activeSections.filter(s => !['skills', 'languages'].includes(s)).map(id => (
+                                    <div key={id} className="mb-6">
+                                        <h3 className="text-lg font-bold uppercase mb-3 text-gray-800 border-b-2 border-gray-100 pb-1">{isAr ? SECTION_TYPES.find(s=>s.id===id).labelAr : SECTION_TYPES.find(s=>s.id===id).labelFr}</h3>
+                                        {sections[id].map((item, i) => (
+                                            <div key={i} className="mb-3">
+                                                {item.title && <div className="font-bold text-gray-800">{item.title}</div>}
+                                                {item.subtitle && <div className="text-sm text-gray-600">{item.subtitle} | {item.date}</div>}
+                                                {item.description && <div className="text-sm text-gray-600 mt-1">{item.description}</div>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                }
+
+                // Standard Layouts
+                return (
+                    <div className="p-8 h-full">
+                        {/* Header */}
+                        <div className="flex justify-between items-start mb-6 border-b-2 pb-4" style={{ borderColor: settings.color }}>
+                            <div className={isAr ? 'text-right' : 'text-left'}>
+                                <h1 className="text-3xl font-bold text-gray-900 mb-1">{personal.firstName} {personal.lastName}</h1>
+                                <p className="text-lg text-gray-600">{personal.title}</p>
+                            </div>
+                            {personal.photo && <img src={personal.photo} className="w-24 h-24 object-cover rounded-lg shadow-md" />}
+                        </div>
+
+                        {/* Contact Grid */}
+                        <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mb-6">
+                            {personal.email && <div><i className="fas fa-envelope w-6" style={colorStyle}></i> {personal.email}</div>}
+                            {personal.phone && <div><i className="fas fa-phone w-6" style={colorStyle}></i> {personal.phone}</div>}
+                            {personal.address && <div><i className="fas fa-map-marker-alt w-6" style={colorStyle}></i> {personal.address}, {personal.city}</div>}
+                            {personal.linkedin && <div><i className="fab fa-linkedin w-6" style={colorStyle}></i> {personal.linkedin}</div>}
+                        </div>
+
+                        {/* Summary */}
+                        {personal.summary && (
+                            <div className="mb-6">
+                                <p className="text-gray-700 leading-relaxed">{personal.summary}</p>
+                            </div>
+                        )}
+
+                        {/* Sections */}
+                        {activeSections.map(id => (
+                            <div key={id}>
+                                {renderSection(id)}
+                            </div>
+                        ))}
+                    </div>
+                );
+            };
+
+            return (
+                <div id="print-area" className={`a4-paper ${fontClass} ${textSize} ${lineSpacing}`} dir={settings.direction}>
+                    {getLayout()}
+                </div>
+            );
+        };
+
+        // 4. Main App Component
+        const App = () => {
+            const [state, setState] = useState(() => {
+                const saved = localStorage.getItem('cv_builder_data');
+                return saved ? JSON.parse(saved) : INITIAL_DATA;
+            });
+            const [activeTab, setActiveTab] = useState('content'); // content, design, settings
+            const [showTemplates, setShowTemplates] = useState(false);
+
+            // Auto-save
+            useEffect(() => {
+                localStorage.setItem('cv_builder_data', JSON.stringify(state));
+            }, [state]);
+
+            const updatePersonal = (field, value) => {
+                setState(prev => ({ ...prev, personal: { ...prev.personal, [field]: value } }));
+            };
+
+            const updateSection = (type, data) => {
+                setState(prev => ({ ...prev, sections: { ...prev.sections, [type]: data } }));
+            };
+
+            const addSection = (type) => {
+                if (state.sections[type].length === 0) {
+                    updateSection(type, [{ name: '' }]); // Initialize with empty item
+                }
+            };
+
+            const removeSection = (type) => {
+                setState(prev => ({ ...prev, sections: { ...prev.sections, [type]: [] } }));
+            };
+
+            const updateSettings = (key, value) => {
+                setState(prev => ({ ...prev, settings: { ...prev.settings, [key]: value } }));
+            };
+
+            const handleImageUpload = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => updatePersonal('photo', reader.result);
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const handleExportPDF = () => {
+                const element = document.getElementById('print-area');
+                const opt = {
+                    margin: 0,
+                    filename: `CV-${state.personal.firstName || 'Export'}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                
+                // Using html2pdf library logic (simulated here as we can't load external heavy scripts easily in this format, 
+                // but in a real build you would use the html2pdf.js library imported at the top)
+                alert("جاري تحضير ملف PDF... (في التطبيق الفعلي، سيتم استخدام مكتبة html2pdf.js)");
+                window.print();
+            };
+
+            const isAr = state.lang === 'ar';
+            const text = {
+                personal: isAr ? 'المعلومات الشخصية' : 'Informations Personnelles',
+                content: isAr ? 'المحتوى' : 'Contenu',
+                design: isAr ? 'التصميم' : 'Design',
+                settings: isAr ? 'الإعدادات' : 'Paramètres',
+                addSection: isAr ? 'إضافة قسم' : 'Ajouter une section',
+                download: isAr ? 'تحميل PDF' : 'Télécharger PDF',
+                print: isAr ? 'طباعة' : 'Imprimer',
+                templates: isAr ? 'القوالب' : 'Modèles',
+                colors: isAr ? 'الألوان' : 'Couleurs',
+                fonts: isAr ? 'الخطوط' : 'Polices',
+                spacing: isAr ? 'التباعد' : 'Espacement',
+                fontSize: isAr ? 'الحجم' : 'Taille',
+                direction: isAr ? 'الاتجاه' : 'Direction',
+                darkMode: isAr ? 'الوضع الداكن' : 'Mode Sombre'
+            };
+
+            return (
+                <AppContext.Provider value={{ state, setState }}>
+                    <div className="flex h-full flex-col md:flex-row overflow-hidden">
+                        
+                        {/* Left Sidebar: Editor */}
+                        <div className="w-full md:w-[450px] lg:w-[500px] bg-white dark:bg-slate-900 border-l dark:border-slate-700 flex flex-col h-full z-20 shadow-xl">
+                            
+                            {/* Top Bar */}
+                            <div className="p-4 border-b dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-800">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center text-white font-bold">CV</div>
+                                    <h1 className="font-bold text-xl tracking-tight">Pro<span className="text-primary-600">Builder</span></h1>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button onClick={() => setState(prev => ({...prev, lang: prev.lang === 'ar' ? 'fr' : 'ar', settings: {...prev.settings, direction: prev.lang === 'ar' ? 'ltr' : 'rtl'}}))} 
+                                        className="px-3 py-1 rounded-md bg-gray-200 dark:bg-slate-700 text-sm font-bold hover:bg-gray-300 transition">
+                                        {state.lang === 'ar' ? 'FR' : 'AR'}
+                                    </button>
+                                    <button onClick={() => document.documentElement.classList.toggle('dark')} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition">
+                                        <i className="fas fa-moon"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Tabs */}
+                            <div className="flex border-b dark:border-slate-700">
+                                {['content', 'design', 'settings'].map(tab => (
+                                    <button 
+                                        key={tab}
+                                        onClick={() => setActiveTab(tab)}
+                                        className={`flex-1 py-3 text-sm font-medium transition-colors relative ${activeTab === tab ? 'text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+                                    >
+                                        {text[tab]}
+                                        {activeTab === tab && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Scrollable Content */}
+                            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                                <AnimatePresence mode="wait">
+                                    {activeTab === 'content' && (
+                                        <motion.div key="content" initial={{opacity:0, x:20}} animate={{opacity:1, x:0}} exit={{opacity:0, x:-20}}>
+                                            {/* Personal Info */}
+                                            <div className="mb-8">
+                                                <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                                                    <i className="fas fa-user-circle text-primary-500"></i> {text.personal}
+                                                </h2>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <InputField label={isAr ? 'الاسم' : 'Prénom'} value={state.personal.firstName} onChange={(v) => updatePersonal('firstName', v)} />
+                                                    <InputField label={isAr ? 'اللقب' : 'Nom'} value={state.personal.lastName} onChange={(v) => updatePersonal('lastName', v)} />
+                                                </div>
+                                                <InputField label={isAr ? 'المسمى الوظيفي' : 'Titre du poste'} value={state.personal.title} onChange={(v) => updatePersonal('title', v)} />
+                                                <InputField label={isAr ? 'البريد الإلكتروني' : 'Email'} type="email" value={state.personal.email} onChange={(v) => updatePersonal('email', v)} />
+                                                <InputField label={isAr ? 'الهاتف' : 'Téléphone'} value={state.personal.phone} onChange={(v) => updatePersonal('phone', v)} />
+                                                <InputField label={isAr ? 'العنوان' : 'Adresse'} value={state.personal.address} onChange={(v) => updatePersonal('address', v)} />
+                                                <InputField label={isAr ? 'نبذة مختصرة' : 'Résumé'} area={true} value={state.personal.summary} onChange={(v) => updatePersonal('summary', v)} />
+                                                
+                                                <div className="mb-4">
+                                                    <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">{isAr ? 'الصورة الشخصية' : 'Photo'}</label>
+                                                    <div className="flex items-center gap-4">
+                                                        <label className="cursor-pointer flex-1 py-2 border-2 border-dashed border-gray-300 rounded-lg text-center text-sm text-gray-500 hover:border-primary-500 hover:text-primary-500 transition">
+                                                            <i className="fas fa-camera mr-2"></i> {state.personal.photo ? (isAr ? 'تغيير' : 'Changer') : (isAr ? 'إضافة صورة' : 'Ajouter')}
+                                                            <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                                                        </label>
+                                                        {state.personal.photo && (
+                                                            <button onClick={() => updatePersonal('photo', null)} className="text-red-500 hover:bg-red-50 p-2 rounded-full">
+                                                                <i className="fas fa-trash"></i>
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Dynamic Sections */}
+                                            {Object.keys(state.sections).map(key => {
+                                                if (state.sections[key].length > 0) {
+                                                    return (
+                                                        <SectionEditor 
+                                                            key={key} 
+                                                            type={key} 
+                                                            data={state.sections[key]} 
+                                                            onChange={(d) => updateSection(key, d)}
+                                                            onDelete={() => removeSection(key)}
+                                                        />
+                                                    );
+                                                }
+                                                return null;
+                                            })}
+
+                                            {/* Add Section Button */}
+                                            <div className="relative group">
+                                                <button className="w-full py-3 bg-primary-50 dark:bg-slate-800 text-primary-600 rounded-xl font-bold border border-primary-200 dark:border-slate-600 hover:bg-primary-100 transition flex items-center justify-center gap-2">
+                                                    <i className="fas fa-plus-circle"></i> {text.addSection}
+                                                </button>
+                                                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-slate-800 shadow-xl rounded-xl border border-gray-100 dark:border-slate-700 p-2 hidden group-hover:block z-50">
+                                                    {SECTION_TYPES.filter(s => state.sections[s.id].length === 0).map(s => (
+                                                        <button key={s.id} onClick={() => addSection(s.id)} className="w-full text-right px-4 py-2 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg text-sm flex items-center gap-2">
+                                                            <i className={`fas ${s.icon} w-5 text-center text-gray-400`}></i> {isAr ? s.labelAr : s.labelFr}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {activeTab === 'design' && (
+                                        <motion.div key="design" initial={{opacity:0, x:20}} animate={{opacity:1, x:0}} exit={{opacity:0, x:-20}} className="space-y-8">
+                                            {/* Templates */}
+                                            <div>
+                                                <h3 className="font-bold mb-3 text-sm uppercase text-gray-500">{text.templates}</h3>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    {TEMPLATES.map(t => (
+                                                        <button 
+                                                            key={t.id}
+                                                            onClick={() => updateSettings('template', t.id)}
+                                                            className={`p-3 rounded-lg border-2 text-center transition-all ${state.settings.template === t.id ? 'border-primary-500 bg-primary-50 dark:bg-slate-800' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300'}`}
+                                                        >
+                                                            <div className="h-16 bg-gray-200 dark:bg-slate-700 rounded mb-2 relative overflow-hidden">
+                                                                {/* Mini Preview representation */}
+                                                                <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-xs">
+                                                                    {t.name}
+                                                                </div>
+                                                            </div>
+                                                            <span className="text-xs font-bold">{t.name}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Colors */}
+                                            <div>
+                                                <h3 className="font-bold mb-3 text-sm uppercase text-gray-500">{text.colors}</h3>
+                                                <div className="flex flex-wrap gap-3">
+                                                    {COLORS.map(c => (
+                                                        <button 
+                                                            key={c}
+                                                            onClick={() => updateSettings('color', c)}
+                                                            className={`w-8 h-8 rounded-full transition-transform hover:scale-110 ${state.settings.color === c ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
+                                                            style={{ backgroundColor: c }}
+                                                        />
+                                                    ))}
+                                                    <input 
+                                                        type="color" 
+                                                        value={state.settings.color} 
+                                                        onChange={(e) => updateSettings('color', e.target.value)}
+                                                        className="w-8 h-8 p-0 border-0 rounded-full overflow-hidden cursor-pointer"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Fonts */}
+                                            <div>
+                                                <h3 className="font-bold mb-3 text-sm uppercase text-gray-500">{text.fonts}</h3>
+                                                <div className="space-y-2">
+                                                    {FONTS.map(f => (
+                                                        <button 
+                                                            key={f.id}
+                                                            onClick={() => updateSettings('font', f.id)}
+                                                            className={`w-full p-3 rounded-lg border text-left flex justify-between items-center ${state.settings.font === f.id ? 'border-primary-500 bg-primary-50 dark:bg-slate-800' : 'border-gray-200 dark:border-slate-700'}`}
+                                                        >
+                                                            <span style={{fontFamily: f.name}}>{f.name}</span>
+                                                            {state.settings.font === f.id && <i className="fas fa-check text-primary-500"></i>}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {activeTab === 'settings' && (
+                                        <motion.div key="settings" initial={{opacity:0, x:20}} animate={{opacity:1, x:0}} exit={{opacity:0, x:-20}} className="space-y-6">
+                                            <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
+                                                <h3 className="font-bold mb-4">{isAr ? 'إعدادات الصفحة' : 'Mise en page'}</h3>
+                                                
+                                                <div className="mb-4">
+                                                    <label className="block text-xs font-bold text-gray-500 mb-2">{text.fontSize}</label>
+                                                    <div className="flex bg-gray-100 dark:bg-slate-900 rounded-lg p-1">
+                                                        {['small', 'medium', 'large'].map(size => (
+                                                            <button 
+                                                                key={size}
+                                                                onClick={() => updateSettings('fontSize', size)}
+                                                                className={`flex-1 py-1 rounded-md text-sm capitalize ${state.settings.fontSize === size ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-gray-500'}`}
+                                                            >
+                                                                {size === 'small' ? (isAr ? 'صغير' : 'Petit') : size === 'medium' ? (isAr ? 'متوسط' : 'Moyen') : (isAr ? 'كبير' : 'Grand')}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <div className="mb-4">
+                                                    <label className="block text-xs font-bold text-gray-500 mb-2">{text.spacing}</label>
+                                                    <div className="flex bg-gray-100 dark:bg-slate-900 rounded-lg p-1">
+                                                        {['compact', 'normal', 'spacious'].map(s => (
+                                                            <button 
+                                                                key={s}
+                                                                onClick={() => updateSettings('spacing', s)}
+                                                                className={`flex-1 py-1 rounded-md text-sm capitalize ${state.settings.spacing === s ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-gray-500'}`}
+                                                            >
+                                                                {s === 'compact' ? (isAr ? 'ضيق' : 'Compact') : s === 'normal' ? (isAr ? 'عادي' : 'Normal') : (isAr ? 'واسع' : 'Aéré')}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            {/* Bottom Actions */}
+                            <div className="p-4 border-t dark:border-slate-700 bg-gray-50 dark:bg-slate-800 flex gap-3">
+                                <button onClick={handleExportPDF} className="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-xl font-bold shadow-lg shadow-primary-500/30 transition flex items-center justify-center gap-2">
+                                    <i className="fas fa-file-pdf"></i> {text.download}
+                                </button>
+                                <button onClick={() => window.print()} className="px-4 py-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl font-bold hover:bg-gray-50 transition">
+                                    <i className="fas fa-print"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Right Side: Preview */}
+                        <div className="flex-1 bg-gray-200 dark:bg-slate-950 overflow-y-auto p-8 relative flex justify-center items-start">
+                            <div className="scale-[0.6] md:scale-[0.8] lg:scale-100 origin-top transition-transform duration-300">
+                                <ResumePreview />
+                            </div>
+                            
+                            {/* Floating Zoom Controls (Visual Only for this demo) */}
+                            <div className="fixed bottom-8 right-8 flex flex-col gap-2 no-print">
+                                <div className="glass p-2 rounded-lg shadow-lg flex flex-col gap-2">
+                                    <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-200 dark:hover:bg-slate-700"><i className="fas fa-plus"></i></button>
+                                    <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-200 dark:hover:bg-slate-700"><i className="fas fa-minus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </AppContext.Provider>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
-
-```
