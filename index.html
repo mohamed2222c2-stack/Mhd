@@ -1,701 +1,728 @@
-```html
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق حفظ 10 جمل يومياً - المستوى A1</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts for Arabic & English -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+```react
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Play, Pause, RotateCcw, Volume2, Globe, Search, Sparkles, 
+  BookOpen, ChevronRight, HelpCircle, ArrowRight, Languages, Check, SkipForward
+} from 'lucide-react';
+
+// إعداد مفتاح الـ API لـ Gemini (يتم تعويضه تلقائياً في البيئة)
+const apiKey = "";
+
+// عينات فيديوهات واجدة مع النصوص ديالها باش يبدا المستخدم مباشرة
+const MOCK_VIDEOS = [
+  {
+    id: "frog-song",
+    youtubeId: "WfKWe8MvI6U", // مثال لفيديو تعليمي للأطفال/اليرقات
+    title: "The Happy Frog - Learn English & Darija",
+    language: "English",
+    transcript: [
+      { id: 1, start: 0, end: 4, text: "I jump really high.", translation: "كنقز عالي بزاف.", words: [
+        { word: "I", translation: "أنا", pronunciation: "آي" },
+        { word: "jump", translation: "كنقز / أقفز", pronunciation: "جامب" },
+        { word: "really", translation: "بزاف / حقاً", pronunciation: "ريلي" },
+        { word: "high", translation: "عالي / مرتفع", pronunciation: "هاي" }
+      ]},
+      { id: 2, start: 4, end: 8, text: "But you cannot fly.", translation: "ولكن ما كتقدرش تطير.", words: [
+        { word: "But", translation: "ولكن", pronunciation: "بات" },
+        { word: "you", translation: "أنت", pronunciation: "يو" },
+        { word: "cannot", translation: "ما كتقدرش / لا تستطيع", pronunciation: "كانوت" },
+        { word: "fly", translation: "تطير", pronunciation: "فلاي" }
+      ]},
+      { id: 3, start: 8, end: 11, text: "Hmm. Yes, I can fly.", translation: "همم. إيه، نقدر نطير.", words: [
+        { word: "Hmm", translation: "همم (للتفكير)", pronunciation: "همم" },
+        { word: "Yes", translation: "إيه / نعم", pronunciation: "ييس" },
+        { word: "I", translation: "أنا", pronunciation: "آي" },
+        { word: "can", translation: "نقدر / أستطيع", pronunciation: "كان" },
+        { word: "fly", translation: "نطير", pronunciation: "فلاي" }
+      ]},
+      { id: 4, start: 11, end: 15, text: "Let's make a bet.", translation: "يلاه نديرو رهان (نتكاتبو).", words: [
+        { word: "Let's", translation: "يلاه / دعنا", pronunciation: "لتس" },
+        { word: "make", translation: "نديرو / نصنع", pronunciation: "ميك" },
+        { word: "a", translation: "أداة نكرة", pronunciation: "إي" },
+        { word: "bet", translation: "رهان / تكاتب", pronunciation: "بيت" }
+      ]}
+    ]
+  },
+  {
+    id: "friends-scene",
+    youtubeId: "vN-1_In7XpM",
+    title: "English Conversations - Greetings",
+    language: "English",
+    transcript: [
+      { id: 1, start: 0, end: 3, text: "How are you doing today?", translation: "كيف داير اليوم؟ / كيف حالك اليوم؟", words: [
+        { word: "How", translation: "كيفاش / كيف", pronunciation: "هاو" },
+        { word: "are", translation: "تكون (فعل مساعد)", pronunciation: "آر" },
+        { word: "you", translation: "أنت", pronunciation: "يو" },
+        { word: "doing", translation: "داير / تفعل", pronunciation: "دوينغ" },
+        { word: "today", translation: "اليوم", pronunciation: "توداي" }
+      ]},
+      { id: 2, start: 3, end: 6, text: "I am doing great, thank you.", translation: "أنا بخير بزاف، شكراً ليك.", words: [
+        { word: "I", translation: "أنا", pronunciation: "آي" },
+        { word: "am", translation: "أكون", pronunciation: "أَم" },
+        { word: "doing", translation: "بصحة / حال", pronunciation: "دوينغ" },
+        { word: "great", translation: "رائع / بخير بزاف", pronunciation: "غريت" },
+        { word: "thank", translation: "أشكر", pronunciation: "ثانك" },
+        { word: "you", translation: "أنت", pronunciation: "يو" }
+      ]}
+    ]
+  }
+];
+
+export default function App() {
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [currentVideo, setCurrentVideo] = useState(MOCK_VIDEOS[0]);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [activeWord, setActiveWord] = useState(null);
+  const [loopMode, setLoopMode] = useState(false); // تكرار نفس السطر
+  const [activeSentenceId, setActiveSentenceId] = useState(1);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [audioLoading, setAudioLoading] = useState(false);
+
+  const playerRef = useRef(null);
+  const progressInterval = useRef(null);
+
+  // تحميل مكتبة يوتيوب الرسمية للمزامنة الدقيقة
+  useEffect(() => {
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    }
+
+    // تهيئة المشغل بمجرد جاهزية المكتبة
+    window.onYouTubeIframeAPIReady = () => {
+      initPlayer(currentVideo.youtubeId);
+    };
+
+    if (window.YT && window.YT.Player) {
+      initPlayer(currentVideo.youtubeId);
+    }
+
+    return () => {
+      clearInterval(progressInterval.current);
+    };
+  }, [currentVideo]);
+
+  const initPlayer = (videoId) => {
+    if (playerRef.current) {
+      try {
+        playerRef.current.destroy();
+      } catch (e) {
+        console.error("Error destroying player:", e);
+      }
+    }
+
+    playerRef.current = new window.YT.Player('youtube-iframe', {
+      videoId: videoId,
+      playerVars: {
+        playsinline: 1,
+        controls: 0, // إخفاء عناصر التحكم الأصلية لتقديم تجربة تعليمية مخصصة
+        disablekb: 1,
+        modestbranding: 1,
+        rel: 0
+      },
+      events: {
+        onReady: (event) => {
+          setIsPlaying(false);
+        },
+        onStateChange: (event) => {
+          // YT.PlayerState.PLAYING = 1
+          if (event.data === 1) {
+            setIsPlaying(true);
+            startTrackingProgress();
+          } else {
+            setIsPlaying(false);
+            clearInterval(progressInterval.current);
+          }
+        }
+      }
+    });
+  };
+
+  // تتبع الوقت الفعلي للفيديو ومزامنة النص
+  const startTrackingProgress = () => {
+    clearInterval(progressInterval.current);
+    progressInterval.current = setInterval(() => {
+      if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
+        const time = playerRef.current.getCurrentTime();
+        setCurrentTime(time);
+
+        // البحث عن السطر المقابل للوقت الحالي
+        const currentSentence = currentVideo.transcript.find(
+          s => time >= s.start && time <= s.end
+        );
+
+        if (currentSentence) {
+          setActiveSentenceId(currentSentence.id);
+
+          // وضعية التكرار (Loop Mode): إعادة تشغيل السطر الحالي تكرارياً
+          if (loopMode && time >= currentSentence.end - 0.2) {
+            playerRef.current.seekTo(currentSentence.start);
+          }
+        }
+      }
+    }, 100);
+  };
+
+  // استخراج الـ ID من رابط يوتيوب
+  const extractVideoId = (url) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  // دالة الاستدعاء مع معالجة الأخطاء والتكرار (Exponential Backoff)
+  const callGeminiWithRetry = async (payload, retries = 5, delay = 1000) => {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
     
-    <style>
-        body {
-            font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8fafc;
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (response.ok) return await response.json();
+      } catch (error) {
+        if (i === retries - 1) throw error;
+        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+      }
+    }
+  };
+
+  // توليد نصوص ذكية وترجمة تفاعلية لأي فيديو يوتيوب عبر Gemini
+  const handleGenerateTranscript = async (e) => {
+    e.preventDefault();
+    const videoId = extractVideoId(youtubeUrl);
+    
+    if (!videoId) {
+      setErrorMessage("عافاك دخل رابط يوتيوب صحيح (مثال: https://www.youtube.com/watch?v=...)");
+      return;
+    }
+
+    setIsGenerating(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    // بناء سياق التوليد للذكاء الاصطناعي للحصول على ملف JSON متناسق
+    const systemPrompt = `You are an expert language teacher and translation tool. 
+    Analyze the requested YouTube video or topic and generate a highly accurate interactive transcript for learning English.
+    Since you are providing transcriptions for language learners, format the response strictly as a JSON object.
+    Ensure that the translations are in Moroccan Darija (الدارجة المغربية) and standard Arabic.
+    The response must strictly match this JSON schema:
+    {
+      "title": "String (Video Title)",
+      "transcript": [
+        {
+          "id": Number (sequential starting from 1),
+          "start": Number (seconds when the sentence starts),
+          "end": Number (seconds when the sentence ends),
+          "text": "String (Clean English sentence)",
+          "translation": "String (Moroccan Darija Translation with Arabic script)",
+          "words": [
+            {
+              "word": "String (English word clean without punctuation)",
+              "translation": "String (Darija/Arabic word translation)",
+              "pronunciation": "String (Phonetic transcription in Arabic letters)"
+            }
+          ]
         }
-        .english-text {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+      ]
+    }`;
+
+    const userPrompt = `Please generate an interactive transcript for this YouTube Video ID: ${videoId}. 
+    Provide about 4 to 6 continuous chronological sentences suitable for learning. Give realistic timestamps starting from 0 seconds up to about 30 seconds. Make the translations natural and fun.`;
+
+    const payload = {
+      contents: [{ parts: [{ text: userPrompt }] }],
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "OBJECT",
+          properties: {
+            title: { type: "STRING" },
+            transcript: {
+              type: "ARRAY",
+              items: {
+                type: "OBJECT",
+                properties: {
+                  id: { type: "INTEGER" },
+                  start: { type: "NUMBER" },
+                  end: { type: "NUMBER" },
+                  text: { type: "STRING" },
+                  translation: { type: "STRING" },
+                  words: {
+                    type: "ARRAY",
+                    items: {
+                      type: "OBJECT",
+                      properties: {
+                        word: { type: "STRING" },
+                        translation: { type: "STRING" },
+                        pronunciation: { type: "STRING" }
+                      },
+                      required: ["word", "translation", "pronunciation"]
+                    }
+                  }
+                },
+                required: ["id", "start", "end", "text", "translation", "words"]
+              }
+            }
+          },
+          required: ["title", "transcript"]
         }
-        /* Flashcard Flip Animation */
-        .card-inner {
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
+      }
+    };
+
+    try {
+      const data = await callGeminiWithRetry(payload);
+      const generatedContent = JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text);
+      
+      if (generatedContent && generatedContent.transcript) {
+        const newVideo = {
+          id: videoId,
+          youtubeId: videoId,
+          title: generatedContent.title || "فيديو مستورد بواسطة الذكاء الاصطناعي",
+          language: "English",
+          transcript: generatedContent.transcript
+        };
+
+        setCurrentVideo(newVideo);
+        setSuccessMessage("تم توليد النص الذكي والترجمة بنجاح! كليك على الكلمات لتجربتها.");
+        setYoutubeUrl("");
+      } else {
+        throw new Error("تنسيق البيانات غير صحيح");
+      }
+    } catch (err) {
+      setErrorMessage("وقع مشكل فالاتصال بالذكاء الاصطناعي. جرب مرة أخرى.");
+      console.error(err);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // نطق الكلمة باستعمال محرك نطق الصوت لـ Gemini
+  const speakWord = async (wordText) => {
+    setAudioLoading(true);
+    const textToSay = `Say clearly: ${wordText}`;
+    const payload = {
+      contents: [{ parts: [{ text: textToSay }] }],
+      generationConfig: {
+        responseModalities: ["AUDIO"],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: {
+              voiceName: "Kore" // صوت واضح لتعلم اللغات
+            }
+          }
         }
-        .card-flipped .card-inner {
-            transform: rotateY(180deg);
-        }
-        .card-front, .card-back {
-            backface-visibility: hidden;
-        }
-        .card-back {
-            transform: rotateY(180deg);
-        }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col justify-between text-slate-800">
+      },
+      model: "gemini-2.5-flash-preview-tts"
+    };
 
-    <!-- Header -->
-    <header class="bg-white border-b border-slate-100 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-indigo-200">
-                    <i class="fa-solid fa-graduation-cap text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="font-bold text-slate-900 text-base leading-tight">تحدي 10 جمل</h1>
-                    <span class="text-xs text-indigo-600 font-semibold tracking-wider">A1 ENGLISH</span>
-                </div>
-            </div>
-            
-            <!-- Streak Indicator -->
-            <div class="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-full border border-amber-200/50">
-                <i class="fa-solid fa-fire text-sm animate-pulse"></i>
-                <span id="streak-count" class="font-bold text-xs">يوم 1</span>
-            </div>
-        </div>
-    </header>
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      const result = await response.json();
+      const pcmBase64 = result.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      
+      if (pcmBase64) {
+        // تحويل الصوت من PCM16 إلى Audio Context للتشغيل المباشر
+        const playWav = (base64Data) => {
+          const binaryString = window.atob(base64Data);
+          const len = binaryString.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          
+          // دالة تحويل PCM إلى WAV لإمكانية تشغيلها فالمتصفح مباشرة
+          const wavHeader = new ArrayBuffer(44);
+          const view = new DataView(wavHeader);
+          
+          /* Chunk ID "RIFF" */
+          view.setUint32(0, 0x52494646, false);
+          /* Chunk Size */
+          view.setUint32(4, 36 + len, true);
+          /* Format "WAVE" */
+          view.setUint32(8, 0x57415645, false);
+          /* Subchunk1 ID "fmt " */
+          view.setUint32(12, 0x666d7420, false);
+          /* Subchunk1 Size */
+          view.setUint32(16, 16, true);
+          /* Audio Format (1 = PCM) */
+          view.setUint16(20, 1, true);
+          /* Number of Channels (1 = Mono) */
+          view.setUint16(22, 1, true);
+          /* Sample Rate (24000Hz افتراضي لـ Gemini) */
+          view.setUint32(24, 24000, true);
+          /* Byte Rate (SampleRate * NumChannels * BitsPerSample/8) */
+          view.setUint32(28, 24000 * 2, true);
+          /* Block Align (NumChannels * BitsPerSample/8) */
+          view.setUint16(32, 2, true);
+          /* Bits per Sample */
+          view.setUint16(34, 16, true);
+          /* Subchunk2 ID "data" */
+          view.setUint32(36, 0x64617461, false);
+          /* Subchunk2 Size */
+          view.setUint32(40, len, true);
+          
+          const blob = new Blob([wavHeader, bytes], { type: 'audio/wav' });
+          const audioUrl = URL.createObjectURL(blob);
+          const audio = new Audio(audioUrl);
+          audio.play();
+        };
 
-    <!-- Main Content -->
-    <main class="flex-grow max-w-md w-full mx-auto px-4 py-6 pb-24">
-        
-        <!-- Day Selector Grid -->
-        <div class="mb-6">
-            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">اختر اليوم الدراسي:</h2>
-            <div class="grid grid-cols-5 gap-1.5" id="day-selector">
-                <!-- Days will be generated by JS -->
-            </div>
-        </div>
+        playWav(pcmBase64);
+      }
+    } catch (err) {
+      console.error("Error playing word sound:", err);
+    } finally {
+      setAudioLoading(false);
+    }
+  };
 
-        <!-- Mode Tabs -->
-        <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
-            <button onclick="switchTab('learn')" id="btn-tab-learn" class="flex-1 py-2 text-sm font-semibold rounded-lg text-indigo-600 bg-white shadow-sm transition-all flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-book-open"></i> تعلم وحفظ
-            </button>
-            <button onclick="switchTab('quiz')" id="btn-tab-quiz" class="flex-1 py-2 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-700 transition-all flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-circle-question"></i> اختبار اليوم
-            </button>
-        </div>
+  // التحكم فالفيديو
+  const togglePlay = () => {
+    if (playerRef.current) {
+      if (isPlaying) {
+        playerRef.current.pauseVideo();
+        setIsPlaying(false);
+      } else {
+        playerRef.current.playVideo();
+        setIsPlaying(true);
+      }
+    }
+  };
 
-        <!-- LEARN TAB -->
-        <div id="tab-learn" class="space-y-6">
-            <!-- Progress Info -->
-            <div class="flex justify-between items-center text-sm">
-                <span class="text-slate-500 font-semibold">التقدم في الحفظ: <span id="current-index" class="text-indigo-600 font-bold">1</span>/10</span>
-                <span class="text-xs text-slate-400">اضغط على البطاقة لترى الترجمة</span>
-            </div>
+  const changeSpeed = (speed) => {
+    setPlaybackRate(speed);
+    if (playerRef.current && typeof playerRef.current.setPlaybackRate === 'function') {
+      playerRef.current.setPlaybackRate(speed);
+    }
+  };
 
-            <!-- Flashcard Component -->
-            <div id="flashcard-container" class="w-full aspect-[4/3] cursor-pointer group" onclick="toggleCardFlip()">
-                <div class="w-full h-full card-inner relative rounded-3xl shadow-xl shadow-slate-100 border border-slate-100 bg-white">
-                    
-                    <!-- Front (English) -->
-                    <div class="card-front absolute inset-0 p-6 flex flex-col justify-between items-center bg-gradient-to-br from-indigo-50/20 via-white to-white rounded-3xl">
-                        <div class="w-full flex justify-between items-center">
-                            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600">English</span>
-                            <div class="flex items-center gap-2">
-                                <!-- Copy Button -->
-                                <button onclick="copyPhrase(event)" title="نسخ الجملة" class="w-10 h-10 bg-slate-50 text-slate-500 hover:text-indigo-600 rounded-full flex items-center justify-center hover:bg-indigo-50 active:scale-95 transition-all shadow-sm border border-slate-100">
-                                    <i id="copy-icon" class="fa-regular fa-copy text-sm"></i>
-                                </button>
-                                <!-- Audio Button -->
-                                <button onclick="playVoice(event)" title="استماع للنطق" class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center hover:bg-indigo-100 active:scale-95 transition-all shadow-sm">
-                                    <i id="audio-icon" class="fa-solid fa-volume-high text-sm"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="text-center px-4">
-                            <p id="phrase-english" class="english-text text-xl sm:text-2xl font-bold text-slate-900 leading-relaxed"></p>
-                        </div>
+  const seekToSentence = (start) => {
+    if (playerRef.current) {
+      playerRef.current.seekTo(start, true);
+      playerRef.current.playVideo();
+      setIsPlaying(true);
+    }
+  };
 
-                        <div class="w-full text-center text-xs text-slate-400">
-                            <i class="fa-solid fa-rotate"></i> اضغط للقلب والترجمة
-                        </div>
-                    </div>
-
-                    <!-- Back (Arabic/Darija Translation) -->
-                    <div class="card-back absolute inset-0 p-6 flex flex-col justify-between items-center bg-indigo-900 rounded-3xl text-white">
-                        <div class="w-full flex justify-between items-center">
-                            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-white/10 text-indigo-200">الترجمة والمعنى</span>
-                            <span class="text-xs text-indigo-300">A1 Level</span>
-                        </div>
-
-                        <div class="text-center px-4">
-                            <p id="phrase-arabic" class="text-lg sm:text-xl font-bold leading-relaxed"></p>
-                            <p id="phrase-darija" class="text-sm text-indigo-200 mt-2 italic"></p>
-                        </div>
-
-                        <div class="w-full text-center text-xs text-indigo-300">
-                            <i class="fa-solid fa-rotate"></i> اضغط للعودة للإنجليزية
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- Controls (Back, Learn Toggle, Next) -->
-            <div class="flex items-center gap-3">
-                <button onclick="prevPhrase()" class="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-chevron-right"></i> السابق
-                </button>
-                <button id="btn-mastered" onclick="toggleMastered()" class="px-5 py-3.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl hover:bg-emerald-100 transition-all flex items-center justify-center">
-                    <i id="mastered-icon" class="fa-regular fa-circle-check text-xl"></i>
-                </button>
-                <button onclick="nextPhrase()" class="flex-1 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-100">
-                    التالي <i class="fa-solid fa-chevron-left"></i>
-                </button>
-            </div>
-
-            <!-- Phrase Tips / Explanation -->
-            <div class="bg-slate-100/50 p-4 rounded-2xl border border-slate-100">
-                <div class="flex items-center gap-2 text-indigo-600 mb-2">
-                    <i class="fa-regular fa-lightbulb"></i>
-                    <span class="font-bold text-xs">شرح واستخدام الجملة:</span>
-                </div>
-                <p id="phrase-tip" class="text-xs text-slate-600 leading-relaxed"></p>
-            </div>
-        </div>
-
-        <!-- QUIZ TAB -->
-        <div id="tab-quiz" class="space-y-6 hidden">
-            <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-4">
-                <div class="flex justify-between items-center">
-                    <span class="text-xs font-bold text-slate-400">اختبر معلوماتك اليوم</span>
-                    <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg" id="quiz-progress">السؤال 1/5</span>
-                </div>
-                
-                <!-- Question -->
-                <div class="py-4">
-                    <p class="text-xs text-slate-400 mb-1">ما هي الترجمة الصحيحة لهذه الجملة؟</p>
-                    <p id="quiz-question-english" class="english-text text-lg font-bold text-slate-900"></p>
-                </div>
-
-                <!-- Answer Options -->
-                <div class="space-y-2" id="quiz-options">
-                    <!-- Dynamic Options -->
-                </div>
-
-                <!-- Next Quiz button hidden initially -->
-                <button id="btn-next-quiz" onclick="nextQuizQuestion()" class="w-full py-3.5 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition-all hidden">
-                    السؤال التالي
-                </button>
-            </div>
-
-            <!-- Quiz Score Panel (Hidden until finish) -->
-            <div id="quiz-results" class="bg-indigo-900 text-white rounded-3xl p-6 text-center space-y-4 hidden">
-                <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto text-amber-300 text-3xl">
-                    <i class="fa-solid fa-trophy"></i>
-                </div>
-                <div>
-                    <h3 class="font-bold text-lg">أحسنت! أكملت اختبار اليوم</h3>
-                    <p class="text-xs text-indigo-200 mt-1" id="quiz-score-text">لقد أجبت بشكل صحيح على 4 من أصل 5 أسئلة.</p>
-                </div>
-                <button onclick="restartQuiz()" class="w-full py-3 bg-white text-indigo-900 font-bold rounded-xl hover:bg-indigo-50 transition-all">
-                    أعد الاختبار
-                </button>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg transition-all transform translate-y-10 opacity-0 pointer-events-none z-50 flex items-center gap-2">
-        <i class="fa-solid fa-circle-info text-indigo-400"></i>
-        <span id="toast-message">تم نسخ النص بنجاح!</span>
-    </div>
-
-    <!-- Bottom Info Navigation -->
-    <footer class="bg-white border-t border-slate-100 py-4 text-center text-xs text-slate-400 fixed bottom-0 left-0 right-0 z-40 max-w-md mx-auto">
-        <p>تطبيق حفظ الجمل اليومي - معاً خطوة بخطوة نحو الاحتراف 🚀</p>
-    </footer>
-
-    <!-- Custom Alerts Modal -->
-    <div id="modal-alert" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-white rounded-3xl p-6 max-w-xs w-full text-center space-y-4 shadow-xl">
-            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl">
-                <i class="fa-solid fa-check-double"></i>
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500/30 selection:text-emerald-300">
+      
+      {/* البار العلوي (Header) */}
+      <header className="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50 px-4 py-3">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/30 text-emerald-400 shadow-lg shadow-emerald-500/5">
+              <Languages className="w-6 h-6" />
             </div>
             <div>
-                <h4 class="font-bold text-slate-900 text-base" id="modal-title">تهانينا!</h4>
-                <p class="text-xs text-slate-500 mt-1 leading-relaxed" id="modal-desc">أكملت حفظ جميع جمل اليوم بنجاح!</p>
+              <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+                دارجة تيوب • DarjaTube Learner
+              </h1>
+              <p className="text-xs text-slate-400 font-medium">تعلم اللغات بنقرة زر وحدة من فيديوهات اليوتيوب</p>
             </div>
-            <button onclick="closeModal()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all text-xs">
-                ممتاز، واصل!
-            </button>
+          </div>
+
+          {/* تبديل الفيديوهات الواجدة بسرعة */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 font-medium">أمثلة سريعة:</span>
+            {MOCK_VIDEOS.map(v => (
+              <button 
+                key={v.id}
+                onClick={() => setCurrentVideo(v)}
+                className={`text-xs px-3 py-1.5 rounded-lg border transition-all duration-300 ${
+                  currentVideo.id === v.id 
+                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400 font-semibold' 
+                    : 'border-slate-800 hover:border-slate-700 text-slate-300 hover:bg-slate-800/40'
+                }`}
+              >
+                {v.title.split('-')[0]}
+              </button>
+            ))}
+          </div>
         </div>
+      </header>
+
+      {/* الجزء الرئيسي */}
+      <main className="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* العمود الأيسر: الإدخال واللاعب */}
+        <section className="lg:col-span-7 flex flex-col gap-6">
+          
+          {/* صندوق جلب رابط يوتيوب جديد */}
+          <div className="bg-slate-900/80 border border-slate-800/60 rounded-2xl p-4 shadow-xl">
+            <h3 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-emerald-400" />
+              أدخل أي رابط يوتيوب لتحليله بالذكاء الاصطناعي:
+            </h3>
+            <form onSubmit={handleGenerateTranscript} className="flex gap-2">
+              <div className="relative flex-1">
+                <input 
+                  type="text" 
+                  value={youtubeUrl}
+                  onChange={(e) => setYoutubeUrl(e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  className="w-full bg-slate-950/80 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 text-slate-200 placeholder:text-slate-500"
+                />
+              </div>
+              <button 
+                type="submit"
+                disabled={isGenerating}
+                className="bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 disabled:bg-slate-800 text-slate-950 px-5 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shrink-0 shadow-lg shadow-emerald-500/10"
+              >
+                {isGenerating ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
+                    <span>جاري التوليد...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    <span>توليد النص</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* رسائل التنبيه */}
+            {errorMessage && (
+              <div className="mt-3 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-lg">
+                {errorMessage}
+              </div>
+            )}
+            {successMessage && (
+              <div className="mt-3 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs rounded-lg flex items-center gap-2">
+                <Check className="w-4 h-4 shrink-0" />
+                {successMessage}
+              </div>
+            )}
+          </div>
+
+          {/* حاوي مشغل اليوتيوب */}
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl relative group">
+            {/* الشاشة والمشغل */}
+            <div className="aspect-video bg-black w-full relative">
+              <div id="youtube-iframe" className="w-full h-full"></div>
+            </div>
+
+            {/* لوحة التحكم السفلية تحت الفيديو */}
+            <div className="p-4 bg-slate-950/90 border-t border-slate-800/80 flex items-center justify-between flex-wrap gap-4">
+              
+              {/* التشغيل والتحكم الرئيسي */}
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={togglePlay}
+                  className="w-12 h-12 rounded-full bg-emerald-500 text-slate-950 hover:scale-105 active:scale-95 transition-all flex items-center justify-center shadow-lg shadow-emerald-500/15"
+                >
+                  {isPlaying ? <Pause className="w-5 h-5 fill-slate-950" /> : <Play className="w-5 h-5 fill-slate-950 translate-x-[1px]" />}
+                </button>
+
+                <button 
+                  onClick={() => playerRef.current && playerRef.current.seekTo(0)}
+                  className="p-3 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-xl transition"
+                  title="إعادة من الأول"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* تحكم سرعة المشغل (1x, 1.25x, 1.5x) */}
+              <div className="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-850">
+                {[1, 1.25, 1.5].map((rate) => (
+                  <button
+                    key={rate}
+                    onClick={() => changeSpeed(rate)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      playbackRate === rate 
+                        ? 'bg-emerald-500 text-slate-950' 
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                    }`}
+                  >
+                    {rate}×
+                  </button>
+                ))}
+              </div>
+
+              {/* زر وضع التكرار للسطر الحالي */}
+              <button
+                onClick={() => setLoopMode(!loopMode)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 ${
+                  loopMode 
+                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400' 
+                    : 'border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className={`w-2 h-2 rounded-full ${loopMode ? 'bg-emerald-400 animate-pulse' : 'bg-slate-600'}`}></div>
+                تكرار السطر الحالي
+              </button>
+            </div>
+          </div>
+
+          {/* بطاقة معلومات الفيديو */}
+          <div className="p-4 bg-slate-900/40 border border-slate-800/50 rounded-2xl flex items-start gap-3">
+            <BookOpen className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-semibold text-slate-200">{currentVideo.title}</h4>
+              <p className="text-xs text-slate-400 mt-1">كليك على أي كلمة تحت باش تفهم الشرح والنطق ديالها بالدارجة.</p>
+            </div>
+          </div>
+
+        </section>
+
+        {/* العمود الأيمن: النصوص التفاعلية والقواميس */}
+        <section className="lg:col-span-5 flex flex-col gap-6">
+          
+          {/* صندوق الكلمات التفاعلية الفعالة (قاموس حي) */}
+          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl relative min-h-[160px] flex flex-col justify-between overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl"></div>
+            
+            {activeWord ? (
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-3 border-b border-slate-800 pb-3">
+                  <div>
+                    <span className="text-xs text-emerald-400 font-bold uppercase tracking-wider">الكلمة المحددة</span>
+                    <h2 className="text-3xl font-extrabold text-white tracking-wide mt-1">{activeWord.word}</h2>
+                  </div>
+                  <button 
+                    onClick={() => speakWord(activeWord.word)}
+                    disabled={audioLoading}
+                    className="p-3 bg-emerald-500 text-slate-950 hover:bg-emerald-400 rounded-xl transition duration-200 disabled:bg-slate-800 flex items-center justify-center group"
+                    title="استمع للنطق"
+                  >
+                    {audioLoading ? (
+                      <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <Volume2 className="w-5 h-5 group-hover:scale-110 transition" />
+                    )}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mt-3">
+                  <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/50">
+                    <span className="text-[10px] text-slate-400 block mb-1">الترجمة بالدارجة</span>
+                    <span className="text-lg font-bold text-emerald-300">{activeWord.translation}</span>
+                  </div>
+                  <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/50">
+                    <span className="text-[10px] text-slate-400 block mb-1">طريقة النطق بالتقريب</span>
+                    <span className="text-lg font-bold text-teal-300">{activeWord.pronunciation}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center py-6 text-slate-500 relative z-10 my-auto">
+                <HelpCircle className="w-10 h-10 text-slate-600 mb-2" />
+                <p className="text-sm font-semibold">برك على شي كلمة من النص المكتوب تحت باش تظهر ليك الترجمة والنطق هنايا فالبلاصة.</p>
+              </div>
+            )}
+          </div>
+
+          {/* لوحة النصوص المتزامنة */}
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex-1 flex flex-col min-h-[350px]">
+            <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+              <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                <Globe className="w-4 h-4 text-emerald-400" />
+                النص التفاعلي المتزامن
+              </h3>
+              <span className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md">
+                {currentVideo.transcript.length} أسطر
+              </span>
+            </div>
+
+            {/* قائمة الأسطر المكتوبة */}
+            <div className="flex flex-col gap-4 overflow-y-auto max-h-[450px] pr-1">
+              {currentVideo.transcript.map((sentence) => {
+                const isActive = activeSentenceId === sentence.id;
+                return (
+                  <div 
+                    key={sentence.id}
+                    className={`p-4 rounded-xl transition-all duration-300 border ${
+                      isActive 
+                        ? 'bg-emerald-950/30 border-emerald-500/40 shadow-md shadow-emerald-500/5' 
+                        : 'bg-slate-950/30 border-slate-850 hover:bg-slate-900/50'
+                    }`}
+                  >
+                    {/* التوقيت وزر القفز */}
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-mono text-slate-500 bg-slate-900 px-2 py-0.5 rounded">
+                        {Math.floor(sentence.start)}s - {Math.floor(sentence.end)}s
+                      </span>
+                      <button 
+                        onClick={() => seekToSentence(sentence.start)}
+                        className={`text-xs flex items-center gap-1 font-semibold ${
+                          isActive ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'
+                        }`}
+                      >
+                        تشغيل هاد المقطع <ChevronRight className="w-3 h-3" />
+                      </button>
+                    </div>
+
+                    {/* النص الإنجليزي مقطع لكلمات تفاعلية */}
+                    <div className="flex flex-wrap gap-1.5 mb-2.5">
+                      {sentence.text.split(" ").map((rawWord, idx) => {
+                        // إزالة علامات الترقيم لعرض نظيف للكلمة
+                        const cleanWord = rawWord.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
+                        const wordObj = sentence.words.find(
+                          w => w.word.toLowerCase() === cleanWord.toLowerCase()
+                        ) || { word: cleanWord, translation: "غير متوفرة", pronunciation: "" };
+
+                        const isWordActive = activeWord && activeWord.word.toLowerCase() === cleanWord.toLowerCase();
+
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => setActiveWord(wordObj)}
+                            className={`px-2 py-1 rounded-md text-base md:text-lg font-medium transition-all ${
+                              isWordActive 
+                                ? 'bg-emerald-400 text-slate-950 font-bold scale-105 shadow-md shadow-emerald-400/20' 
+                                : isActive 
+                                  ? 'hover:bg-emerald-500/20 text-white font-semibold' 
+                                  : 'hover:bg-slate-800 text-slate-300'
+                            }`}
+                          >
+                            {rawWord}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* الترجمة العربية/الدارجة الكاملة تحت السطر */}
+                    <p className={`text-sm leading-relaxed border-t border-slate-800/50 pt-2 text-right ${
+                      isActive ? 'text-emerald-300 font-medium' : 'text-slate-400'
+                    }`}>
+                      {sentence.translation}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+        </section>
+
+      </main>
+
+      {/* الفوتر */}
+      <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
+        <p className="max-w-md mx-auto leading-relaxed">
+          تم التطوير بالكامل لدعم التعلم التفاعلي للغات. يمكنك نسخ أي رابط من يوتيوب لتعلم المفردات مباشرة عبر الذكاء الاصطناعي.
+        </p>
+      </footer>
     </div>
-
-    <!-- JavaScript logic -->
-    <script>
-        // Database of Sentences for 5 Days (10 Sentences per day)
-        const dailyData = {
-            1: [
-                { en: "How is it going?", ar: "كيف تسير الأمور؟", dj: "كيداير الأمور؟", tip: "تعبير غير رسمي يُستعمل للسؤال عن أحوال الشخص." },
-                { en: "Nice to meet you.", ar: "سررت بلقائك.", dj: "متشرفين بمعرفتك.", tip: "تُقال عند لقاء شخص لأول مرة بشكل مؤدب." },
-                { en: "Have a nice day!", ar: "أتمنى لك يوماً سعيداً!", dj: "نهار مبروك!", tip: "تُقال عند توديع شخص ما في الصباح أو الظهر." },
-                { en: "I am really sorry.", ar: "أنا آسف حقاً.", dj: "سمح ليا بزاف.", tip: "تُستخدم لتقديم اعتذار صادق وقوي." },
-                { en: "Can you help me?", ar: "هل يمكنك مساعدتي؟", dj: "واش تقدر تعاوني؟", tip: "صيغة طلب مهذبة لطلب المساعدة." },
-                { en: "Where is the bathroom?", ar: "أين يوجد الحمام؟", dj: "فين كاين بيت الما؟", tip: "سؤال أساسي ومهم جداً عند التواجد في مكان عام." },
-                { en: "How much is this?", ar: "كم سعر هذا؟", dj: "بشحال هادا؟", tip: "للسؤال عن ثمن السلع أثناء التسوق." },
-                { en: "What do you do?", ar: "ماذا تعمل؟", dj: "شنو كتدير في الخدمة؟", tip: "للسؤال عن وظيفة أو مهنة الشخص." },
-                { en: "I don't understand.", ar: "أنا لا أفهم.", dj: "ما فهمتش.", tip: "تُقال عندما لا تستوعب فكرة أو كلاماً معيناً." },
-                { en: "See you later!", ar: "أراك لاحقاً!", dj: "نشوفك من بعد!", tip: "طريقة غير رسمية لتوديع الأصدقاء." }
-            ],
-            2: [
-                { en: "What time is it?", ar: "كم الساعة؟", dj: "شحال في الساعة؟", tip: "للسؤال عن الوقت الحالي." },
-                { en: "Excuse me, please.", ar: "معذرة، من فضلك.", dj: "سمح ليا عافاك.", tip: "لجذب انتباه شخص ما بقمة الأدب." },
-                { en: "Where are you from?", ar: "من أين أنت؟", dj: "منين أنت؟", tip: "للسؤال عن بلد أو مدينة الشخص الأصلي." },
-                { en: "It doesn't matter.", ar: "لا يهم / ليس مهماً.", dj: "شي ماشي مهم / هانية.", tip: "للتعبير عن أن الأمر بسيط ولا داعي للقلق منه." },
-                { en: "What's the weather like?", ar: "كيف هو الطقس؟", dj: "كيداير الجو اليوم؟", tip: "للسؤال عن حالة الجو." },
-                { en: "Can I have the bill?", ar: "هل يمكنني الحصول على الحساب؟", dj: "عافاك جيب ليا الحساب.", tip: "يُسخدم لطلب الفاتورة في المطعم." },
-                { en: "Do you speak English?", ar: "هل تتحدث الإنجليزية؟", dj: "واش كتهدر بالإنجليزية؟", tip: "للاستفسار عن مهارة اللغة عند الطرف الآخر." },
-                { en: "I would like some water.", ar: "أود بعض الماء.", dj: "بغيت شوية ديال الما عافاك.", tip: "طلب مهذب للحصول على الماء." },
-                { en: "Congratulations!", ar: "تهانينا! / مبروك!", dj: "مبروك عليك!", tip: "لتهنئة شخص بنجاح أو مناسبة سعيدة." },
-                { en: "Take care of yourself.", ar: "اعتني بنفسك.", dj: "تهلا في راسك.", tip: "عبارة توديع دافئة للأصدقاء والعائلة." }
-            ],
-            3: [
-                { en: "I am lost.", ar: "أنا تائه.", dj: "تجلّيت / تلفت.", tip: "تُقال عندما تضل طريقك وتبحث عن مساعدة." },
-                { en: "Just a moment, please.", ar: "لحظة واحدة من فضلك.", dj: "بلاتي واحد الدقيقة عافاك.", tip: "لطلب الانتظار البسيط من الطرف الآخر." },
-                { en: "What do you mean?", ar: "ماذا تقصد؟", dj: "شنو قصدتي؟", tip: "للاستفسار وتوضيح فكرة غير مفهومة." },
-                { en: "How do you feel?", ar: "كيف تشعر؟", dj: "باش كتحس؟", tip: "للسؤال عن الحالة الصحية أو النفسية للشخص." },
-                { en: "I am very tired.", ar: "أنا متعب جداً.", dj: "أنا عيان بزاف.", tip: "للتعبير عن الإرهاق الشديد." },
-                { en: "It's a beautiful day.", ar: "إنه يوم جميل.", dj: "نهار غزال اليوم.", tip: "للتعليق على روعة الطقس أو اليوم." },
-                { en: "Have a safe trip!", ar: "أتمنى لك رحلة آمنة!", dj: "طريق السلامة!", tip: "تُقال لتوديع شخص مسافر." },
-                { en: "I need some help.", ar: "أنا بحاجة لبعض المساعدة.", dj: "محتاج شوية المعاونة.", tip: "تعبير مباشر ومباشر لطلب العون." },
-                { en: "Where do you live?", ar: "أين تعيش؟", dj: "فين ساكن؟", tip: "للسؤال عن مكان الإقامة الحالي." },
-                { en: "Good luck with that!", ar: "حظاً موفقاً في ذلك!", dj: "الله يسهل عليك في هادشي!", tip: "لتشجيع شخص مقبل على عمل أو تحدٍ جديد." }
-            ],
-            4: [
-                { en: "Never mind.", ar: "لا عليك / انسى الأمر.", dj: "ما كاين باس / هانية.", tip: "تُقال لتهوين الأمور وتجاوز المشكلة." },
-                { en: "Can I try this on?", ar: "هل يمكنني قياس هذا؟", dj: "واش نقدر نقيس هادا؟", tip: "تُستخدم في محلات الملابس لقياس المقاس." },
-                { en: "What is your phone number?", ar: "ما هو رقم هاتفك؟", dj: "شنو هو نمرة التلفون ديالك؟", tip: "لطلب وسيلة تواصل سريعة." },
-                { en: "I am on my way.", ar: "أنا في طريقي.", dj: "أنا جاي في الطريق.", tip: "لإخبار الطرف الآخر أنك قادم إليه." },
-                { en: "It is too expensive.", ar: "إنه غالٍ جداً.", dj: "هادشي غالي بزاف.", tip: "للتعبير عن أن السعر مرتفع عن المعتاد." },
-                { en: "Where is the nearest bank?", ar: "أين أقرب بنك؟", dj: "فين كاين أقرب ببنكة هنا؟", tip: "للسؤال عن الخدمات القريبة منك." },
-                { en: "Enjoy your meal!", ar: "بالهناء والشفاء! / شهية طيبة!", dj: "بصحتكم الماكلة!", tip: "تُقال قبل البدء في الأكل." },
-                { en: "I don't know.", ar: "أنا لا أعلم.", dj: "ما عرفتش.", tip: "الإجابة الكلاسيكية عند عدم معرفة المعلومة." },
-                { en: "Call me later.", ar: "اتصل بي لاحقاً.", dj: "صونيا عليا من بعد.", tip: "عند انشغالك ورغبتك في التواصل لاحقاً." },
-                { en: "I'm proud of you.", ar: "أنا فخور بك.", dj: "أنا فخور بيك.", tip: "لتشجيع شخص ما والرفع من معنوياته." }
-            ],
-            5: [
-                { en: "Which color do you like?", ar: "أي لون تفضل؟", dj: "أنا لون كيعجبك؟", tip: "للسؤال عن التفضيلات والأذواق الملونة." },
-                { en: "Let's go together.", ar: "لنذهب معاً.", dj: "يلاه نمشيو بجوج.", tip: "لاقتراح الذهاب الجماعي في نزهة أو رحلة." },
-                { en: "Can you repeat that?", ar: "هل يمكنك تكرار ذلك؟", dj: "واش تقدر تعاود هادشي؟", tip: "لطلب إعادة الكلمات إن لم تسمعها بوضوح." },
-                { en: "I will be back soon.", ar: "سأعود قريباً.", dj: "دابا نرجع دغيا.", tip: "لإعلام الآخرين بذهابك وعودتك السريعة." },
-                { en: "How was your weekend?", ar: "كيف كانت عطلة نهاية الأسبوع？", dj: "كي دوزتي الويكاند؟", tip: "سؤال ودود يطرح عادة يوم الاثنين في العمل." },
-                { en: "I need to go now.", ar: "يجب أن أذهب الآن.", dj: "خاصني نمشي دابا.", tip: "للاستئذان بالانصراف بلطف." },
-                { en: "You are welcome.", ar: "على الرحب والسعة.", dj: "بلا جميل / مرحبا.", tip: "الرد المثالي والمهذب على عبارة 'شكراً لك'." },
-                { en: "It is very cold today.", ar: "الجو بارد جداً اليوم.", dj: "البرد بزاف اليوم.", tip: "للتعليق على انخفاض درجات الحرارة." },
-                { en: "What are you doing?", ar: "ماذا تفعل الآن؟", dj: "شنو كتدير دابا؟", tip: "للاستفسار عن النشاط الحالي الذي يقوم به الشخص." },
-                { en: "Everything is perfect.", ar: "كل شيء على ما يرام.", dj: "كلشي هو هذاك / ناضي.", tip: "للتعبير عن الرضا والارتياح التام للوضع." }
-            ]
-        };
-
-        // Application State
-        let currentDay = 1;
-        let currentPhraseIdx = 0;
-        let masteredPhrases = {}; // format: { dayNum: [indices_of_mastered_phrases] }
-        let streak = 1;
-
-        // Quiz State
-        let quizQuestions = [];
-        let currentQuizIdx = 0;
-        let quizScore = 0;
-
-        // Initialize App
-        window.onload = function() {
-            loadLocalProgress();
-            renderDaySelector();
-            updateStreakDisplay();
-            loadPhrase();
-        };
-
-        // Render the Day Buttons
-        function renderDaySelector() {
-            const container = document.getElementById('day-selector');
-            container.innerHTML = '';
-            
-            Object.keys(dailyData).forEach(day => {
-                const dayNum = parseInt(day);
-                const isSelected = dayNum === currentDay;
-                const isCompleted = isDayCompleted(dayNum);
-                
-                let btnClass = "py-2.5 rounded-xl text-xs font-bold transition-all text-center flex flex-col items-center justify-center border ";
-                
-                if (isSelected) {
-                    btnClass += "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-100 scale-105";
-                } else if (isCompleted) {
-                    btnClass += "bg-emerald-50 border-emerald-200 text-emerald-700";
-                } else {
-                    btnClass += "bg-white border-slate-200 text-slate-600 hover:border-indigo-200";
-                }
-
-                const checkIcon = isCompleted ? '<i class="fa-solid fa-circle-check text-[10px] text-emerald-500 mt-0.5"></i>' : '';
-
-                container.innerHTML += `
-                    <button onclick="selectDay(${dayNum})" class="${btnClass}">
-                        <span>يوم ${dayNum}</span>
-                        ${checkIcon ? checkIcon : '<span class="text-[9px] text-slate-400">10 جمل</span>'}
-                    </button>
-                `;
-            });
-        }
-
-        function selectDay(dayNum) {
-            currentDay = dayNum;
-            currentPhraseIdx = 0;
-            renderDaySelector();
-            loadPhrase();
-            
-            if (document.getElementById('tab-quiz').classList.contains('hidden') === false) {
-                initQuiz();
-            }
-        }
-
-        // Load the current phrase logic
-        function loadPhrase() {
-            const phrase = dailyData[currentDay][currentPhraseIdx];
-            
-            // DOM Elements
-            document.getElementById('phrase-english').innerText = phrase.en;
-            document.getElementById('phrase-arabic').innerText = phrase.ar;
-            document.getElementById('phrase-darija').innerText = `بالمغربية: "${phrase.dj}"`;
-            document.getElementById('phrase-tip').innerText = phrase.tip;
-            document.getElementById('current-index').innerText = currentPhraseIdx + 1;
-
-            // Reset Flashcard Flip (Ensure Front is showing)
-            const card = document.getElementById('flashcard-container');
-            card.classList.remove('card-flipped');
-
-            // Reset Copy Icon State
-            const copyIcon = document.getElementById('copy-icon');
-            copyIcon.className = "fa-regular fa-copy text-sm";
-
-            updateMasteredButtonState();
-        }
-
-        function toggleCardFlip() {
-            const card = document.getElementById('flashcard-container');
-            card.classList.toggle('card-flipped');
-        }
-
-        // Voice TTS with robust fix
-        function playVoice(event) {
-            event.stopPropagation(); // Stop card flip
-            const phrase = dailyData[currentDay][currentPhraseIdx].en;
-            
-            if ('speechSynthesis' in window) {
-                const audioIcon = document.getElementById('audio-icon');
-                
-                // Visual feedback of reading
-                audioIcon.className = "fa-solid fa-spinner animate-spin text-sm";
-                
-                // Cancel existing speech first
-                window.speechSynthesis.cancel();
-                
-                // For modern browsers: sometimes SpeechSynthesis gets stuck, resume fixes it
-                window.speechSynthesis.resume();
-
-                const utterance = new SpeechSynthesisUtterance(phrase);
-                utterance.lang = 'en-US';
-                utterance.rate = 0.85; // Natural learning speed
-
-                utterance.onend = function() {
-                    audioIcon.className = "fa-solid fa-volume-high text-sm";
-                };
-
-                utterance.onerror = function(e) {
-                    audioIcon.className = "fa-solid fa-volume-xmark text-sm text-rose-500";
-                    showToast("عذراً! واجه المتصفح مشكلة في نطق الجملة.");
-                    console.error("SpeechSynthesis error:", e);
-                };
-
-                window.speechSynthesis.speak(utterance);
-            } else {
-                showToast("عذراً، النطق الصوتي غير مدعوم على متصفحك الحالي.");
-            }
-        }
-
-        // Standard Copy Function for iFrame restriction safety
-        function copyPhrase(event) {
-            event.stopPropagation(); // Avoid card flip
-            const phrase = dailyData[currentDay][currentPhraseIdx].en;
-            
-            try {
-                // Creation of a temporary textarea because clipboard.writeText is restricted in sandboxes
-                const tempTextArea = document.createElement("textarea");
-                tempTextArea.value = phrase;
-                document.body.appendChild(tempTextArea);
-                tempTextArea.select();
-                document.execCommand("copy");
-                document.body.removeChild(tempTextArea);
-                
-                // Success visual change
-                const copyIcon = document.getElementById('copy-icon');
-                copyIcon.className = "fa-solid fa-check text-emerald-500 text-sm";
-                
-                showToast("تم نسخ الجملة بنجاح!");
-                
-                // Reset after 2 seconds
-                setTimeout(() => {
-                    copyIcon.className = "fa-regular fa-copy text-sm";
-                }, 2000);
-            } catch (err) {
-                showToast("فشل نسخ النص، يرجى تكرار المحاولة.");
-            }
-        }
-
-        // Custom Toast Notification
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-message').innerText = message;
-            
-            // Slide up & Fade in
-            toast.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
-            toast.classList.add('opacity-100', 'translate-y-0');
-
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
-                toast.classList.remove('opacity-100', 'translate-y-0');
-            }, 2500);
-        }
-
-        // Next Phrase
-        function nextPhrase() {
-            if (currentPhraseIdx < 9) {
-                currentPhraseIdx++;
-                loadPhrase();
-            } else {
-                if (isDayCompleted(currentDay)) {
-                    showCustomModal("رائع وممتاز!", `لقد حفظت جميع الـ 10 جمل لليوم ${currentDay}. حان وقت اختبار اليوم لقياس مستواك!`);
-                    switchTab('quiz');
-                } else {
-                    showCustomModal("أكمل الحفظ!", "الرجاء تأشير جميع جمل اليوم الـ 10 كـ 'محفوظة' لإنهاء اليوم بنجاح.");
-                }
-            }
-        }
-
-        // Prev Phrase
-        function prevPhrase() {
-            if (currentPhraseIdx > 0) {
-                currentPhraseIdx--;
-                loadPhrase();
-            }
-        }
-
-        // Mastered Toggle logic
-        function toggleMastered() {
-            if (!masteredPhrases[currentDay]) {
-                masteredPhrases[currentDay] = [];
-            }
-
-            const arr = masteredPhrases[currentDay];
-            const foundIdx = arr.indexOf(currentPhraseIdx);
-
-            if (foundIdx > -1) {
-                arr.splice(foundIdx, 1);
-            } else {
-                arr.push(currentPhraseIdx);
-            }
-
-            saveProgress();
-            updateMasteredButtonState();
-            renderDaySelector();
-
-            if (foundIdx === -1 && currentPhraseIdx < 9) {
-                setTimeout(() => {
-                    nextPhrase();
-                }, 400);
-            }
-        }
-
-        function updateMasteredButtonState() {
-            const btn = document.getElementById('btn-mastered');
-            const icon = document.getElementById('mastered-icon');
-            const isMastered = masteredPhrases[currentDay]?.includes(currentPhraseIdx);
-
-            if (isMastered) {
-                btn.className = "px-5 py-3.5 bg-emerald-600 text-white border border-emerald-600 rounded-2xl transition-all flex items-center justify-center";
-                icon.className = "fa-solid fa-circle-check text-xl animate-bounce";
-            } else {
-                btn.className = "px-5 py-3.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl hover:bg-emerald-100 transition-all flex items-center justify-center";
-                icon.className = "fa-regular fa-circle text-xl";
-            }
-        }
-
-        function isDayCompleted(dayNum) {
-            return masteredPhrases[dayNum] && masteredPhrases[dayNum].length === 10;
-        }
-
-        // Navigation Tabs
-        function switchTab(mode) {
-            const btnLearn = document.getElementById('btn-tab-learn');
-            const btnQuiz = document.getElementById('btn-tab-quiz');
-            const tabLearn = document.getElementById('tab-learn');
-            const tabQuiz = document.getElementById('tab-quiz');
-
-            if (mode === 'learn') {
-                btnLearn.className = "flex-1 py-2 text-sm font-semibold rounded-lg text-indigo-600 bg-white shadow-sm transition-all flex items-center justify-center gap-1.5";
-                btnQuiz.className = "flex-1 py-2 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-700 transition-all flex items-center justify-center gap-1.5";
-                tabLearn.classList.remove('hidden');
-                tabQuiz.classList.add('hidden');
-            } else {
-                btnQuiz.className = "flex-1 py-2 text-sm font-semibold rounded-lg text-indigo-600 bg-white shadow-sm transition-all flex items-center justify-center gap-1.5";
-                btnLearn.className = "flex-1 py-2 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-700 transition-all flex items-center justify-center gap-1.5";
-                tabQuiz.classList.remove('hidden');
-                tabLearn.classList.add('hidden');
-                initQuiz();
-            }
-        }
-
-        // --- QUIZ SYSTEM ---
-        function initQuiz() {
-            const allPhrases = [...dailyData[currentDay]];
-            quizQuestions = shuffleArray(allPhrases).slice(0, 5);
-            currentQuizIdx = 0;
-            quizScore = 0;
-
-            document.getElementById('quiz-results').classList.add('hidden');
-            document.getElementById('quiz-progress').parentNode.parentNode.classList.remove('hidden');
-            
-            showQuizQuestion();
-        }
-
-        function showQuizQuestion() {
-            if (currentQuizIdx >= quizQuestions.length) {
-                showQuizResults();
-                return;
-            }
-
-            const question = quizQuestions[currentQuizIdx];
-            document.getElementById('quiz-progress').innerText = `السؤال ${currentQuizIdx + 1}/${quizQuestions.length}`;
-            document.getElementById('quiz-question-english').innerText = question.en;
-            document.getElementById('btn-next-quiz').classList.add('hidden');
-
-            let options = [question.ar];
-            const otherPhrases = dailyData[currentDay].filter(p => p.en !== question.en);
-            const shuffledOthers = shuffleArray(otherPhrases);
-            
-            for (let i = 0; i < 3; i++) {
-                if (shuffledOthers[i]) {
-                    options.push(shuffledOthers[i].ar);
-                }
-            }
-
-            options = shuffleArray(options);
-            const optionsContainer = document.getElementById('quiz-options');
-            optionsContainer.innerHTML = '';
-
-            options.forEach((opt, index) => {
-                optionsContainer.innerHTML += `
-                    <button onclick="checkAnswer(this, '${opt === question.ar}', '${question.ar}')" class="w-full text-right p-4 rounded-xl border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-all flex justify-between items-center">
-                        <span>${opt}</span>
-                        <i class="fa-regular fa-circle text-slate-300"></i>
-                    </button>
-                `;
-            });
-        }
-
-        function checkAnswer(btn, isCorrect, correctAnsText) {
-            const options = document.getElementById('quiz-options').querySelectorAll('button');
-            options.forEach(b => b.disabled = true);
-
-            const icon = btn.querySelector('i');
-
-            if (isCorrect === 'true') {
-                btn.className = "w-full text-right p-4 rounded-xl border border-emerald-500 bg-emerald-50 text-emerald-800 text-sm font-semibold transition-all flex justify-between items-center";
-                icon.className = "fa-solid fa-circle-check text-emerald-600";
-                quizScore++;
-            } else {
-                btn.className = "w-full text-right p-4 rounded-xl border border-rose-500 bg-rose-50 text-rose-800 text-sm font-semibold transition-all flex justify-between items-center";
-                icon.className = "fa-solid fa-circle-xmark text-rose-600";
-
-                options.forEach(b => {
-                    if (b.innerText.trim() === correctAnsText) {
-                        b.className = "w-full text-right p-4 rounded-xl border border-emerald-500 bg-emerald-50 text-emerald-800 text-sm font-semibold transition-all flex justify-between items-center";
-                        b.querySelector('i').className = "fa-solid fa-circle-check text-emerald-600";
-                    }
-                });
-            }
-
-            document.getElementById('btn-next-quiz').classList.remove('hidden');
-        }
-
-        function nextQuizQuestion() {
-            currentQuizIdx++;
-            showQuizQuestion();
-        }
-
-        function showQuizResults() {
-            document.getElementById('quiz-progress').parentNode.parentNode.classList.add('hidden');
-            const resultBox = document.getElementById('quiz-results');
-            resultBox.classList.remove('hidden');
-
-            document.getElementById('quiz-score-text').innerText = `لقد أجبت بشكل صحيح على ${quizScore} من أصل 5 أسئلة.`;
-
-            if (quizScore === 5) {
-                updateStreak();
-            }
-        }
-
-        function restartQuiz() {
-            initQuiz();
-        }
-
-        // --- UTILITIES ---
-        function shuffleArray(array) {
-            const arr = [...array];
-            for (let i = arr.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [arr[i], arr[j]] = [arr[j], arr[i]];
-            }
-            return arr;
-        }
-
-        // Alert Modals
-        function showCustomModal(title, desc) {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-desc').innerText = desc;
-            document.getElementById('modal-alert').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('modal-alert').classList.add('hidden');
-        }
-
-        // Streak & Progress Storage
-        function updateStreak() {
-            streak++;
-            localStorage.setItem('streak_count', streak);
-            updateStreakDisplay();
-        }
-
-        function updateStreakDisplay() {
-            document.getElementById('streak-count').innerText = `اليوم الـ ${streak}`;
-        }
-
-        // Save progress to local storage
-        function saveProgress() {
-            localStorage.setItem('mastered_phrases_A1', JSON.stringify(masteredPhrases));
-        }
-
-        function loadLocalProgress() {
-            const saved = localStorage.getItem('mastered_phrases_A1');
-            if (saved) {
-                masteredPhrases = JSON.parse(saved);
-            }
-            
-            const savedStreak = localStorage.getItem('streak_count');
-            if (savedStreak) {
-                streak = parseInt(savedStreak);
-            }
-        }
-    </script>
-</body>
-</html>
+  );
+}
 
 ```
