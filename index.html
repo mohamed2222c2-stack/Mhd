@@ -4,209 +4,239 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>منشئ السير الذاتية - قالب إبداعي</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Tajawal', 'Cairo', 'Inter', 'sans-serif'],
-                        ar: ['Tajawal', 'Cairo', 'sans-serif'],
-                        fr: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        :root { --primary-color: #2563eb; --secondary-color: #1e40af; }
+        :root { --primary: #2c3e50; --accent: #3498db; --sidebar-bg: #2c3e50; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body, #root { height: 100%; overflow: hidden; }
-        body { font-family: 'Tajawal', 'Cairo', sans-serif; background: #f3f4f6; }
-        .dark body { background: #0f172a; color: #e2e8f0; }
+        html, body { height: 100%; font-family: 'Tajawal', 'Cairo', sans-serif; background: #f3f4f6; overflow: hidden; }
 
-        .a4-paper { width: 210mm; min-height: 297mm; background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.15); margin: 0 auto; position: relative; overflow: hidden; }
+        /* Layout */
+        .app { display: flex; height: 100vh; flex-direction: column; }
+        .editor-panel { flex: 1; display: flex; flex-direction: column; background: #fff; overflow: hidden; }
+        .preview-panel { display: none; flex: 1; background: #e5e7eb; overflow: auto; padding: 20px; align-items: flex-start; justify-content: center; }
 
-        /* Template: Creative */
-        .template-creative { display: flex; min-height: 297mm; }
-        .template-creative .left-panel { width: 32%; background: #2c3e50; color: white; padding: 35px 25px; position: relative; }
-        .template-creative .left-panel::before { content: ''; position: absolute; top: 0; right: 0; width: 100%; height: 200px; background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%); opacity: 0.3; }
-        .template-creative .name { font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 5px; position: relative; z-index: 1; }
-        .template-creative .job-title { font-size: 13px; text-align: center; opacity: 0.85; margin-bottom: 30px; position: relative; z-index: 1; }
-        .template-creative .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.2); }
-        .template-creative .contact-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 12px; }
-        .template-creative .contact-icon { width: 28px; height: 28px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
-        .template-creative .right-panel { width: 68%; padding: 35px 30px; background: #fafafa; }
-        .template-creative .main-section-title { font-size: 16px; font-weight: 700; color: #2c3e50; margin-bottom: 18px; display: flex; align-items: center; gap: 12px; }
-        .template-creative .main-section-title .icon-box { width: 32px; height: 32px; background: #2c3e50; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
-        .template-creative .experience-item { margin-bottom: 22px; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .template-creative .exp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .template-creative .exp-title { font-weight: 700; font-size: 14px; color: #2c3e50; }
-        .template-creative .exp-date { font-size: 11px; color: #3498db; background: #ebf5fb; padding: 3px 10px; border-radius: 12px; }
-        .template-creative .exp-company { font-size: 12px; color: #7f8c8d; margin-bottom: 8px; }
-        .template-creative .exp-desc { font-size: 12px; color: #555; line-height: 1.7; }
+        @media (min-width: 768px) {
+            .app { flex-direction: row; }
+            .editor-panel { width: 450px; flex: none; border-left: 1px solid #e5e7eb; }
+            .preview-panel { display: flex; }
+        }
+
+        /* Header */
+        .header { padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; }
+        .logo-icon { width: 32px; height: 32px; background: #2563eb; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .header-btns { display: flex; gap: 8px; }
+        .btn-icon { width: 36px; height: 36px; border-radius: 8px; border: none; background: #e5e7eb; cursor: pointer; font-size: 14px; }
+        .btn-icon:hover { background: #d1d5db; }
+
+        /* Tabs */
+        .tabs { display: flex; border-bottom: 1px solid #e5e7eb; background: #fff; }
+        .tab { flex: 1; padding: 12px; text-align: center; font-size: 14px; font-weight: 600; color: #6b7280; cursor: pointer; border: none; background: none; position: relative; }
+        .tab.active { color: #2563eb; }
+        .tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #2563eb; }
+
+        /* Content */
+        .content { flex: 1; overflow-y: auto; padding: 16px; }
+        .section { margin-bottom: 20px; }
+        .section-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: #1f2937; }
+        .section-title i { color: #2563eb; }
+
+        /* Inputs */
+        .form-group { margin-bottom: 12px; }
+        .form-label { display: block; font-size: 12px; font-weight: 700; color: #6b7280; margin-bottom: 4px; text-transform: uppercase; }
+        .form-input, .form-textarea { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff; }
+        .form-input:focus, .form-textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .form-textarea { min-height: 80px; resize: vertical; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        /* Section Cards */
+        .card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb; }
+        .card-title { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .card-title i { color: #2563eb; }
+        .btn-delete { color: #ef4444; background: none; border: none; cursor: pointer; padding: 4px; }
+        .btn-delete:hover { background: #fef2f2; border-radius: 4px; }
+        .btn-add { width: 100%; padding: 10px; border: 2px dashed #d1d5db; border-radius: 8px; background: none; color: #6b7280; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .btn-add:hover { border-color: #2563eb; color: #2563eb; }
+
+        /* Item Editor */
+        .item-editor { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 8px; position: relative; }
+        .item-remove { position: absolute; top: 8px; left: 8px; color: #9ca3af; cursor: pointer; font-size: 12px; border: none; background: none; }
+        .item-remove:hover { color: #ef4444; }
+
+        /* Add Section Dropdown */
+        .add-section-wrapper { position: relative; }
+        .add-section-menu { position: absolute; bottom: 100%; left: 0; right: 0; margin-bottom: 8px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 8px; display: none; z-index: 50; }
+        .add-section-wrapper:hover .add-section-menu { display: block; }
+        .add-section-item { width: 100%; text-align: right; padding: 10px 12px; border-radius: 8px; border: none; background: none; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 10px; }
+        .add-section-item:hover { background: #f3f4f6; }
+        .add-section-item i { width: 20px; text-align: center; color: #9ca3af; }
+
+        /* Colors */
+        .color-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+        .color-btn { width: 36px; height: 36px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; }
+        .color-btn.active { border-color: #1f2937; }
+        .color-picker { width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; padding: 0; }
+
+        /* Font buttons */
+        .font-btn { width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .font-btn.active { border-color: #2563eb; background: #eff6ff; }
+        .font-btn .check { color: #2563eb; }
+
+        /* Size buttons */
+        .size-row { display: flex; background: #f3f4f6; border-radius: 8px; padding: 4px; }
+        .size-btn { flex: 1; padding: 8px; border: none; background: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
+        .size-btn.active { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 600; }
+
+        /* Bottom Actions */
+        .actions { padding: 12px 16px; background: #f8fafc; border-top: 1px solid #e5e7eb; display: flex; gap: 8px; }
+        .btn-primary { flex: 1; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-secondary { padding: 12px 16px; background: #fff; border: 1px solid #d1d5db; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .btn-secondary:hover { background: #f9fafb; }
+        .btn-green { flex: 1; padding: 12px; background: #16a34a; color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-green:hover { background: #15803d; }
+
+        /* ===== CV TEMPLATE ===== */
+        .cv-paper { width: 210mm; min-height: 297mm; background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.15); margin: 0 auto; overflow: hidden; }
+        .cv-creative { display: flex; min-height: 297mm; }
+        .cv-sidebar { width: 32%; background: #2c3e50; color: white; padding: 35px 25px; position: relative; }
+        .cv-sidebar::before { content: ''; position: absolute; top: 0; right: 0; width: 100%; height: 200px; background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%); opacity: 0.3; }
+        .cv-name { font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 5px; position: relative; z-index: 1; }
+        .cv-job { font-size: 13px; text-align: center; opacity: 0.85; margin-bottom: 30px; position: relative; z-index: 1; }
+        .cv-section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .cv-contact { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 12px; }
+        .cv-contact-icon { width: 28px; height: 28px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+        .cv-skill-bar { height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+        .cv-skill-fill { height: 100%; background: #3498db; border-radius: 2px; }
+        .cv-hobby-tag { display: inline-block; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 12px; font-size: 11px; margin: 3px; }
+        .cv-main { width: 68%; padding: 35px 30px; background: #fafafa; }
+        .cv-main-title { font-size: 16px; font-weight: 700; color: #2c3e50; margin-bottom: 18px; display: flex; align-items: center; gap: 12px; }
+        .cv-icon-box { width: 32px; height: 32px; background: #2c3e50; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+        .cv-exp-item { margin-bottom: 22px; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .cv-exp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .cv-exp-title { font-weight: 700; font-size: 14px; color: #2c3e50; }
+        .cv-exp-date { font-size: 11px; color: #3498db; background: #ebf5fb; padding: 3px 10px; border-radius: 12px; }
+        .cv-exp-company { font-size: 12px; color: #7f8c8d; margin-bottom: 8px; }
+        .cv-exp-desc { font-size: 12px; color: #555; line-height: 1.7; }
+
+        /* Mobile Preview Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; display: none; flex-direction: column; }
+        .modal-overlay.active { display: flex; }
+        .modal-header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .modal-close { width: 40px; height: 40px; background: white; color: #333; border: none; border-radius: 50%; cursor: pointer; font-size: 16px; }
+        .modal-body { flex: 1; overflow: auto; padding: 10px; display: flex; justify-content: center; }
+        .modal-footer { padding: 12px; display: flex; gap: 10px; justify-content: center; }
+        .modal-footer button { padding: 12px 24px; border-radius: 25px; border: none; font-weight: 700; font-size: 14px; cursor: pointer; }
+        .modal-btn-back { background: white; color: #333; }
+        .modal-btn-download { background: #2563eb; color: white; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #cv-print, #cv-print * { visibility: visible; }
+            #cv-print { position: absolute; left: 0; top: 0; width: 100%; margin: 0; }
+            .no-print { display: none !important; }
+        }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        .dark ::-webkit-scrollbar-thumb { background: #475569; }
-
-        @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; }
-            .no-print { display: none !important; }
-        }
-
-        /* Mobile Preview Modal */
-        .mobile-preview-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            z-index: 200;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
-        }
-        .mobile-preview-content {
-            width: 100%;
-            max-height: 85vh;
-            overflow-y: auto;
-            display: flex;
-            justify-content: center;
-        }
-        .mobile-preview-close {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            width: 40px;
-            height: 40px;
-            background: white;
-            color: #333;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 201;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        .mobile-preview-actions {
-            position: fixed;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 201;
-        }
-        .mobile-preview-actions button {
-            padding: 10px 20px;
-            border-radius: 25px;
-            border: none;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        .mobile-btn-primary { background: #2563eb; color: white; }
-        .mobile-btn-secondary { background: white; color: #333; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .a4-paper { transform: scale(0.45); transform-origin: top center; }
-        }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-slate-900">
-    <div id="root"></div>
+<body>
+    <div class="app">
+        <!-- Editor Panel -->
+        <div class="editor-panel">
+            <div class="header">
+                <div class="logo">
+                    <div class="logo-icon">CV</div>
+                    <span>Pro<span style="color:#2563eb">Builder</span></span>
+                </div>
+                <div class="header-btns">
+                    <button class="btn-icon" onclick="toggleLang()" id="langBtn">FR</button>
+                    <button class="btn-icon" onclick="toggleDark()"><i class="fas fa-moon"></i></button>
+                </div>
+            </div>
 
-    <script type="text/babel">
-        const { useState, useEffect, createContext, useContext } = React;
-        const { motion, AnimatePresence } = window.Motion;
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('content')" data-tab="content">المحتوى</button>
+                <button class="tab" onclick="switchTab('design')" data-tab="design">التصميم</button>
+                <button class="tab" onclick="switchTab('settings')" data-tab="settings">الإعدادات</button>
+            </div>
 
-        const AppContext = createContext();
+            <div class="content" id="content-area">
+                <!-- Content injected by JS -->
+            </div>
 
-        const DEMO_DATA = {
+            <div class="actions">
+                <button class="btn-green" onclick="showMobilePreview()" id="previewBtn">
+                    <i class="fas fa-eye"></i> <span>معاينة السيرة</span>
+                </button>
+                <button class="btn-primary" onclick="downloadPDF()">
+                    <i class="fas fa-file-pdf"></i> <span>تحميل PDF</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Preview Panel (Desktop) -->
+        <div class="preview-panel" id="desktop-preview">
+            <div id="cv-print"></div>
+        </div>
+    </div>
+
+    <!-- Mobile Preview Modal -->
+    <div class="modal-overlay" id="mobile-modal">
+        <div class="modal-header">
+            <h3>معاينة السيرة الذاتية</h3>
+            <button class="modal-close" onclick="hideMobilePreview()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div id="mobile-cv-print"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn-back" onclick="hideMobilePreview()">
+                <i class="fas fa-arrow-right"></i> رجوع
+            </button>
+            <button class="modal-btn-download" onclick="downloadPDF()">
+                <i class="fas fa-file-pdf"></i> تحميل PDF
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ===== DATA =====
+        let data = JSON.parse(localStorage.getItem('cv_data')) || {
+            lang: 'ar',
             personal: {
-                firstName: 'أحمد',
-                lastName: 'العلمي',
-                title: 'مهندس برمجيات',
-                email: 'ahmed.alami@email.com',
-                phone: '+212 6 12 34 56 78',
-                address: 'شارع الحسن الثاني',
-                city: 'الدار البيضاء',
-                country: 'المغرب',
-                linkedin: 'linkedin.com/in/ahmedalami',
-                website: 'ahmedalami.dev',
+                firstName: 'أحمد', lastName: 'العلمي', title: 'مهندس برمجيات',
+                email: 'ahmed.alami@email.com', phone: '+212 6 12 34 56 78',
+                address: 'شارع الحسن الثاني', city: 'الدار البيضاء', country: 'المغرب',
+                linkedin: 'linkedin.com/in/ahmedalami', website: 'ahmedalami.dev',
                 summary: 'مهندس برمجيات ذو خبرة 5 سنوات في تطوير تطبيقات الويب والموبايل. متخصص في React و Node.js مع شغف كبير لتجربة المستخدم وتصميم الواجهات.'
             },
             sections: {
                 experience: [
-                    { title: 'مهندس برمجيات أول', subtitle: 'شركة التقنية المتقدمة', date: '2022 - الحاضر', description: 'قيادة فريق من 5 مطورين في بناء منصة التجارة الإلكترونية. تحسين أداء التطبيق بنسبة 40%.' },
-                    { title: 'مطور ويب', subtitle: 'شركة الإبداع الرقمي', date: '2020 - 2022', description: 'تطوير وصيانة 15 موقع ويب لعملاء مختلفين. العمل مع React و Vue.js و Laravel.' },
-                    { title: 'متدبر', subtitle: 'شركة النجوم التقنية', date: '2019 - 2020', description: 'المساعدة في تطوير تطبيقات الموبايل باستخدام Flutter. المشاركة في مراجعات الكود.' }
+                    { title: 'مهندس برمجيات أول', subtitle: 'شركة التقنية المتقدمة', date: '2022 - الحاضر', description: 'قيادة فريق من 5 مطورين في بناء منصة التجارة الإلكترونية.' },
+                    { title: 'مطور ويب', subtitle: 'شركة الإبداع الرقمي', date: '2020 - 2022', description: 'تطوير وصيانة 15 موقع ويب لعملاء مختلفين.' }
                 ],
                 education: [
-                    { title: 'ماستر في علوم الحاسوب', subtitle: 'جامعة محمد الخامس', date: '2018 - 2020', description: 'تخصص في الذكاء الاصطناعي وتعلم الآلة. معدل: 16.5/20' },
-                    { title: 'إجازة في الهندسة المعلوماتية', subtitle: 'المدرسة العليا للتقنيين', date: '2015 - 2018', description: 'تخصص في تطوير البرمجيات. مشروع تخرج: نظام إدارة المحتوى الذكي.' }
+                    { title: 'ماستر في علوم الحاسوب', subtitle: 'جامعة محمد الخامس', date: '2018 - 2020', description: 'تخصص في الذكاء الاصطناعي وتعلم الآلة.' }
                 ],
                 skills: [
-                    { name: 'React / Next.js' },
-                    { name: 'Node.js / Express' },
-                    { name: 'TypeScript' },
-                    { name: 'Python / Django' },
-                    { name: 'Flutter' },
-                    { name: 'Docker / Kubernetes' },
-                    { name: 'AWS / Azure' },
-                    { name: 'Git / CI/CD' }
+                    { name: 'React / Next.js' }, { name: 'Node.js / Express' },
+                    { name: 'TypeScript' }, { name: 'Python / Django' }
                 ],
                 languages: [
                     { name: 'العربية', level: 'اللغة الأم' },
                     { name: 'الفرنسية', level: 'متقدم' },
-                    { name: 'الإنجليزية', level: 'متقدم' },
-                    { name: 'الإسبانية', level: 'مبتدئ' }
+                    { name: 'الإنجليزية', level: 'متقدم' }
                 ],
-                courses: [
-                    { title: 'شهادة AWS Solutions Architect', subtitle: 'Amazon Web Services', date: '2023', description: 'شهادة معتمدة في تصميم الحلول السحابية' },
-                    { title: 'Google UX Design Certificate', subtitle: 'Coursera', date: '2022', description: 'تصميم تجربة المستخدم وتصميم الواجهات' }
-                ],
-                projects: [
-                    { title: 'منصة التعلم الإلكتروني', subtitle: 'مشروع شخصي', date: '2023', description: 'منصة تعليمية متكاملة تخدم 5000+ طالب. بنيت بـ Next.js و Prisma.' },
-                    { title: 'تطبيق إدارة المهام', subtitle: 'مشروع مفتوح المصدر', date: '2022', description: 'تطبيق إدارة مهام متقدم مع مزامنة سحابية. 200+ نجمة على GitHub.' }
-                ],
-                hobbies: [
-                    { name: 'القراءة التقنية' },
-                    { name: 'التصوير الفوتوغرافي' },
-                    { name: 'كرة القدم' },
-                    { name: 'السفر والاستكشاف' }
-                ]
+                courses: [], projects: [], hobbies: []
             },
-            settings: {
-                template: 'creative',
-                color: '#2c3e50',
-                font: 'tajawal',
-                fontSize: 'medium',
-                spacing: 'normal',
-                direction: 'rtl'
-            }
+            settings: { color: '#2c3e50', font: 'tajawal', fontSize: 'medium', spacing: 'normal' }
         };
-
-        const COLORS = ['#2c3e50', '#e74c3c', '#27ae60', '#8e44ad', '#d35400', '#16a085', '#c0392b', '#2980b9', '#2d3436'];
 
         const SECTION_TYPES = [
             { id: 'experience', labelAr: 'الخبرات المهنية', labelFr: 'Expériences', icon: 'fa-briefcase' },
@@ -218,498 +248,396 @@
             { id: 'hobbies', labelAr: 'الهوايات', labelFr: 'Loisirs', icon: 'fa-heart' }
         ];
 
-        const InputField = ({ label, value, onChange, type = "text", placeholder, area = false }) => {
-            const baseClass = "w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all";
-            return (
-                <div className="mb-3">
-                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">{label}</label>
-                    {area ? (
-                        <textarea className={`${baseClass} min-h-[80px] resize-y`} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
-                    ) : (
-                        <input type={type} className={baseClass} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
-                    )}
-                </div>
-            );
-        };
+        const COLORS = ['#2c3e50', '#e74c3c', '#27ae60', '#8e44ad', '#d35400', '#16a085', '#c0392b', '#2980b9', '#2d3436'];
+        const SKILL_LEVELS = [90, 75, 60, 85, 70, 95, 80, 65];
 
-        const SectionEditor = ({ type, data, onChange, onDelete }) => {
-            const { state } = useContext(AppContext);
-            const isAr = state.lang === 'ar';
-            const labels = SECTION_TYPES.find(s => s.id === type);
+        let currentTab = 'content';
 
-            const handleChange = (index, field, value) => {
-                const newData = [...data];
-                newData[index] = { ...newData[index], [field]: value };
-                onChange(newData);
-            };
+        // ===== SAVE =====
+        function save() {
+            localStorage.setItem('cv_data', JSON.stringify(data));
+            renderCV();
+        }
 
-            const addItem = () => {
-                const newItem = type === 'skills' || type === 'hobbies' ? { name: '' } :
-                                type === 'languages' ? { name: '', level: '' } :
-                                { title: '', subtitle: '', date: '', description: '' };
-                onChange([...data, newItem]);
-            };
+        // ===== TABS =====
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+            renderEditor();
+        }
 
-            const removeItem = (index) => {
-                const newData = data.filter((_, i) => i !== index);
-                onChange(newData);
-            };
-
-            return (
-                <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-slate-700 mb-4">
-                    <div className="flex justify-between items-center mb-3 border-b border-gray-100 dark:border-slate-700 pb-2">
-                        <h3 className="font-bold text-base flex items-center gap-2">
-                            <i className={`fas ${labels.icon} text-blue-500`}></i>
-                            {isAr ? labels.labelAr : labels.labelFr}
-                        </h3>
-                        <button onClick={onDelete} className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-full transition-colors">
-                            <i className="fas fa-trash-alt text-sm"></i>
-                        </button>
-                    </div>
-                    <div className="space-y-3">
-                        {data.map((item, index) => (
-                            <div key={index} className="relative bg-gray-50 dark:bg-slate-900/50 p-3 rounded-lg border border-gray-200 dark:border-slate-700 group">
-                                <button onClick={() => removeItem(index)} className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity">
-                                    <i className="fas fa-times text-xs"></i>
-                                </button>
-                                {type === 'skills' || type === 'hobbies' ? (
-                                    <InputField label={isAr ? 'المهارة / الهواية' : 'Compétence / Loisir'} value={item.name} onChange={(v) => handleChange(index, 'name', v)} />
-                                ) : type === 'languages' ? (
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <InputField label={isAr ? 'اللغة' : 'Langue'} value={item.name} onChange={(v) => handleChange(index, 'name', v)} />
-                                        <InputField label={isAr ? 'المستوى' : 'Niveau'} value={item.level} onChange={(v) => handleChange(index, 'level', v)} />
-                                    </div>
-                                ) : (
-                                    <div className="space-y-2">
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <InputField label={isAr ? 'العنوان' : 'Titre'} value={item.title} onChange={(v) => handleChange(index, 'title', v)} />
-                                            <InputField label={isAr ? 'المؤسسة' : 'Institution'} value={item.subtitle} onChange={(v) => handleChange(index, 'subtitle', v)} />
-                                        </div>
-                                        <InputField label={isAr ? 'التاريخ' : 'Date'} value={item.date} onChange={(v) => handleChange(index, 'date', v)} placeholder="2020 - 2024" />
-                                        <InputField label={isAr ? 'الوصف' : 'Description'} area={true} value={item.description} onChange={(v) => handleChange(index, 'description', v)} />
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                    <button onClick={addItem} className="mt-3 w-full py-2 border-2 border-dashed border-gray-300 dark:border-slate-600 text-gray-500 dark:text-gray-400 rounded-lg hover:border-blue-500 hover:text-blue-500 transition-colors flex items-center justify-center gap-2 text-sm font-medium">
-                        <i className="fas fa-plus"></i> {isAr ? 'إضافة جديد' : 'Ajouter'}
-                    </button>
-                </div>
-            );
-        };
-
-        const ResumePreview = () => {
-            const { state } = useContext(AppContext);
-            const { personal, sections, settings } = state;
-            const isAr = settings.direction === 'rtl';
-
-            const getSkillLevel = (index) => [90, 75, 60, 85, 70, 95, 80, 65][index % 8];
-            const getLanguageLevel = (level) => ({ 'اللغة الأم': 100, 'متقدم': 85, 'متوسط': 60, 'مبتدئ': 30 }[level] || 50);
-
-            const activeSections = Object.keys(sections).filter(key => sections[key].length > 0);
-
-            return (
-                <div id="print-area" className="a4-paper template-creative" dir={settings.direction}>
-                    <div className="left-panel">
-                        <div className="name">{personal.firstName}</div>
-                        <div className="name" style={{marginTop:-5}}>{personal.lastName}</div>
-                        <div className="job-title">{personal.title}</div>
-                        <div className="section-title">{isAr ? 'معلومات الاتصال' : 'Contact'}</div>
-                        {personal.phone && <div className="contact-item"><div className="contact-icon"><i className="fas fa-phone"></i></div>{personal.phone}</div>}
-                        {personal.email && <div className="contact-item"><div className="contact-icon"><i className="fas fa-envelope"></i></div>{personal.email}</div>}
-                        {personal.address && <div className="contact-item"><div className="contact-icon"><i className="fas fa-map-marker-alt"></i></div>{personal.address}</div>}
-                        {personal.linkedin && <div className="contact-item"><div className="contact-icon"><i className="fab fa-linkedin"></i></div>{personal.linkedin}</div>}
-                        {personal.website && <div className="contact-item"><div className="contact-icon"><i className="fas fa-globe"></i></div>{personal.website}</div>}
-                        {activeSections.includes('skills') && (
-                            <><div className="section-title" style={{marginTop:30}}>{isAr ? 'المهارات' : 'Compétences'}</div>
-                            {sections.skills.map((s, i) => (
-                                <div key={i} style={{marginBottom:10}}>
-                                    <div style={{fontSize:12,marginBottom:4}}>{s.name}</div>
-                                    <div style={{height:4,background:'rgba(255,255,255,0.2)',borderRadius:2,overflow:'hidden'}}>
-                                        <div style={{height:'100%',width:getSkillLevel(i)+'%',background:'#3498db',borderRadius:2}}></div>
-                                    </div>
-                                </div>
-                            ))}</>
-                        )}
-                        {activeSections.includes('languages') && (
-                            <><div className="section-title" style={{marginTop:30}}>{isAr ? 'اللغات' : 'Langues'}</div>
-                            {sections.languages.map((l, i) => (
-                                <div key={i} style={{marginBottom:8}}>
-                                    <div style={{fontSize:12}}>{l.name}</div>
-                                    <div style={{fontSize:10,opacity:0.7}}>{l.level}</div>
-                                </div>
-                            ))}</>
-                        )}
-                        {activeSections.includes('hobbies') && (
-                            <><div className="section-title" style={{marginTop:30}}>{isAr ? 'الهوايات' : 'Loisirs'}</div>
-                            <div style={{display:'flex',flexWrap:'wrap',gap:5}}>
-                                {sections.hobbies.map((h, i) => <span key={i} style={{background:'rgba(255,255,255,0.1)',padding:'4px 10px',borderRadius:12,fontSize:11}}>{h.name}</span>)}
-                            </div></>
-                        )}
-                    </div>
-                    <div className="right-panel">
-                        {personal.summary && (
-                            <div className="mb-6">
-                                <div className="main-section-title"><div className="icon-box"><i className="fas fa-user"></i></div>{isAr ? 'نبذة عني' : 'À propos'}</div>
-                                <p style={{fontSize:13,lineHeight:1.8,color:'#555'}}>{personal.summary}</p>
-                            </div>
-                        )}
-                        {activeSections.includes('experience') && (
-                            <div className="mb-6">
-                                <div className="main-section-title"><div className="icon-box"><i className="fas fa-briefcase"></i></div>{isAr ? 'الخبرات المهنية' : 'Expériences'}</div>
-                                {sections.experience.map((exp, i) => (
-                                    <div key={i} className="experience-item">
-                                        <div className="exp-header">
-                                            <span className="exp-title">{exp.title}</span>
-                                            <span className="exp-date">{exp.date}</span>
-                                        </div>
-                                        <div className="exp-company">{exp.subtitle}</div>
-                                        <div className="exp-desc">{exp.description}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        {activeSections.includes('education') && (
-                            <div className="mb-6">
-                                <div className="main-section-title"><div className="icon-box"><i className="fas fa-graduation-cap"></i></div>{isAr ? 'التعليم' : 'Éducation'}</div>
-                                {sections.education.map((edu, i) => (
-                                    <div key={i} className="experience-item">
-                                        <div className="exp-header">
-                                            <span className="exp-title">{edu.title}</span>
-                                            <span className="exp-date">{edu.date}</span>
-                                        </div>
-                                        <div className="exp-company">{edu.subtitle}</div>
-                                        <div className="exp-desc">{edu.description}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        {activeSections.includes('courses') && (
-                            <div className="mb-6">
-                                <div className="main-section-title"><div className="icon-box"><i className="fas fa-certificate"></i></div>{isAr ? 'الدورات' : 'Formations'}</div>
-                                {sections.courses.map((c, i) => (
-                                    <div key={i} className="experience-item">
-                                        <div className="exp-header">
-                                            <span className="exp-title">{c.title}</span>
-                                            <span className="exp-date">{c.date}</span>
-                                        </div>
-                                        <div className="exp-company">{c.subtitle}</div>
-                                        <div className="exp-desc">{c.description}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        {activeSections.includes('projects') && (
-                            <div>
-                                <div className="main-section-title"><div className="icon-box"><i className="fas fa-project-diagram"></i></div>{isAr ? 'المشاريع' : 'Projets'}</div>
-                                {sections.projects.map((p, i) => (
-                                    <div key={i} className="experience-item">
-                                        <div className="exp-header">
-                                            <span className="exp-title">{p.title}</span>
-                                            <span className="exp-date">{p.date}</span>
-                                        </div>
-                                        <div className="exp-company">{p.subtitle}</div>
-                                        <div className="exp-desc">{p.description}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
-        };
-
-        // Mobile Preview Modal
-        const MobilePreviewModal = ({ onClose, onDownload }) => {
-            return (
-                <div className="mobile-preview-overlay" onClick={onClose}>
-                    <button className="mobile-preview-close" onClick={onClose}>
-                        <i className="fas fa-times"></i>
-                    </button>
-                    <div className="mobile-preview-content" onClick={(e) => e.stopPropagation()}>
-                        <div style={{transform: 'scale(0.42)', transformOrigin: 'top center'}}>
-                            <ResumePreview />
-                        </div>
-                    </div>
-                    <div className="mobile-preview-actions">
-                        <button className="mobile-btn-secondary" onClick={onClose}>
-                            <i className="fas fa-arrow-right ml-2"></i> رجوع
-                        </button>
-                        <button className="mobile-btn-primary" onClick={onDownload}>
-                            <i className="fas fa-file-pdf ml-2"></i> تحميل PDF
-                        </button>
-                    </div>
-                </div>
-            );
-        };
-
-        const App = () => {
-            const [state, setState] = useState(() => {
-                const saved = localStorage.getItem('cv_builder_data');
-                return saved ? JSON.parse(saved) : DEMO_DATA;
-            });
-            const [activeTab, setActiveTab] = useState('content');
-            const [showMobilePreview, setShowMobilePreview] = useState(false);
-            const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
-            useEffect(() => {
-                localStorage.setItem('cv_builder_data', JSON.stringify(state));
-            }, [state]);
-
-            useEffect(() => {
-                const handleResize = () => setIsMobile(window.innerWidth < 768);
-                window.addEventListener('resize', handleResize);
-                return () => window.removeEventListener('resize', handleResize);
-            }, []);
-
-            const updatePersonal = (field, value) => {
-                setState(prev => ({ ...prev, personal: { ...prev.personal, [field]: value } }));
-            };
-
-            const updateSection = (type, data) => {
-                setState(prev => ({ ...prev, sections: { ...prev.sections, [type]: data } }));
-            };
-
-            const addSection = (type) => {
-                if (state.sections[type].length === 0) updateSection(type, [{ name: '' }]);
-            };
-
-            const removeSection = (type) => {
-                setState(prev => ({ ...prev, sections: { ...prev.sections, [type]: [] } }));
-            };
-
-            const updateSettings = (key, value) => {
-                setState(prev => ({ ...prev, settings: { ...prev.settings, [key]: value } }));
-            };
-
-            const handleExportPDF = () => {
-                const element = document.getElementById('print-area');
-                const opt = {
-                    margin: 0,
-                    filename: `CV-${state.personal.firstName || 'Export'}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-                if (typeof html2pdf !== 'undefined') {
-                    html2pdf().set(opt).from(element).save();
-                } else {
-                    window.print();
-                }
-            };
-
-            const isAr = state.lang === 'ar';
-            const text = {
+        // ===== RENDER EDITOR =====
+        function renderEditor() {
+            const area = document.getElementById('content-area');
+            const isAr = data.lang === 'ar';
+            const t = {
                 personal: isAr ? 'المعلومات الشخصية' : 'Informations Personnelles',
-                content: isAr ? 'المحتوى' : 'Contenu',
-                design: isAr ? 'التصميم' : 'Design',
-                settings: isAr ? 'الإعدادات' : 'Paramètres',
-                addSection: isAr ? 'إضافة قسم' : 'Ajouter une section',
-                download: isAr ? 'تحميل PDF' : 'Télécharger PDF',
-                print: isAr ? 'طباعة' : 'Imprimer',
-                preview: isAr ? 'معاينة السيرة' : 'Aperçu CV',
+                firstName: isAr ? 'الاسم' : 'Prénom', lastName: isAr ? 'اللقب' : 'Nom',
+                title: isAr ? 'المسمى الوظيفي' : 'Titre du poste',
+                email: isAr ? 'البريد الإلكتروني' : 'Email',
+                phone: isAr ? 'الهاتف' : 'Téléphone',
+                address: isAr ? 'العنوان' : 'Adresse',
+                city: isAr ? 'المدينة' : 'Ville', country: isAr ? 'البلد' : 'Pays',
+                linkedin: 'LinkedIn', website: isAr ? 'الموقع' : 'Site web',
+                summary: isAr ? 'نبذة مختصرة' : 'Résumé',
                 colors: isAr ? 'الألوان' : 'Couleurs',
                 fonts: isAr ? 'الخطوط' : 'Polices',
+                fontSize: isAr ? 'الحجم' : 'Taille',
                 spacing: isAr ? 'التباعد' : 'Espacement',
-                fontSize: isAr ? 'الحجم' : 'Taille'
+                small: isAr ? 'صغير' : 'Petit', medium: isAr ? 'متوسط' : 'Moyen', large: isAr ? 'كبير' : 'Grand',
+                compact: isAr ? 'ضيق' : 'Compact', normal: isAr ? 'عادي' : 'Normal', spacious: isAr ? 'واسع' : 'Aéré',
+                addSection: isAr ? 'إضافة قسم' : 'Ajouter une section',
+                addNew: isAr ? 'إضافة جديد' : 'Ajouter',
+                name: isAr ? 'الاسم' : 'Nom', level: isAr ? 'المستوى' : 'Niveau',
+                institution: isAr ? 'المؤسسة' : 'Institution',
+                date: isAr ? 'التاريخ' : 'Date', desc: isAr ? 'الوصف' : 'Description'
             };
 
-            return (
-                <AppContext.Provider value={{ state, setState }}>
-                    <div className="flex h-screen flex-col md:flex-row overflow-hidden">
-                        {/* Left Sidebar: Editor */}
-                        <div className="w-full md:w-[450px] lg:w-[500px] bg-white dark:bg-slate-900 border-l dark:border-slate-700 flex flex-col h-full z-20 shadow-xl">
-                            {/* Top Bar */}
-                            <div className="p-4 border-b dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-800">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">CV</div>
-                                    <h1 className="font-bold text-xl tracking-tight">Pro<span className="text-blue-600">Builder</span></h1>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button onClick={() => setState(prev => ({...prev, lang: prev.lang === 'ar' ? 'fr' : 'ar', settings: {...prev.settings, direction: prev.lang === 'ar' ? 'ltr' : 'rtl'}}))}
-                                        className="px-3 py-1 rounded-md bg-gray-200 dark:bg-slate-700 text-sm font-bold hover:bg-gray-300 transition">
-                                        {state.lang === 'ar' ? 'FR' : 'AR'}
-                                    </button>
-                                    <button onClick={() => document.documentElement.classList.toggle('dark')} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition">
-                                        <i className="fas fa-moon"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Tabs */}
-                            <div className="flex border-b dark:border-slate-700">
-                                {['content', 'design', 'settings'].map(tab => (
-                                    <button key={tab} onClick={() => setActiveTab(tab)}
-                                        className={`flex-1 py-3 text-sm font-medium transition-colors relative ${activeTab === tab ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>
-                                        {text[tab]}
-                                        {activeTab === tab && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
-                                    </button>
-                                ))}
-                            </div>
-
-                            {/* Scrollable Content */}
-                            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-                                <AnimatePresence mode="wait">
-                                    {activeTab === 'content' && (
-                                        <motion.div key="content" initial={{opacity:0, x:20}} animate={{opacity:1, x:0}} exit={{opacity:0, x:-20}}>
-                                            {/* Personal Info */}
-                                            <div className="mb-8">
-                                                <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                                    <i className="fas fa-user-circle text-blue-500"></i> {text.personal}
-                                                </h2>
-                                                <div className="grid grid-cols-2 gap-3">
-                                                    <InputField label={isAr ? 'الاسم' : 'Prénom'} value={state.personal.firstName} onChange={(v) => updatePersonal('firstName', v)} />
-                                                    <InputField label={isAr ? 'اللقب' : 'Nom'} value={state.personal.lastName} onChange={(v) => updatePersonal('lastName', v)} />
-                                                </div>
-                                                <InputField label={isAr ? 'المسمى الوظيفي' : 'Titre du poste'} value={state.personal.title} onChange={(v) => updatePersonal('title', v)} />
-                                                <InputField label={isAr ? 'البريد الإلكتروني' : 'Email'} type="email" value={state.personal.email} onChange={(v) => updatePersonal('email', v)} />
-                                                <InputField label={isAr ? 'الهاتف' : 'Téléphone'} value={state.personal.phone} onChange={(v) => updatePersonal('phone', v)} />
-                                                <InputField label={isAr ? 'العنوان' : 'Adresse'} value={state.personal.address} onChange={(v) => updatePersonal('address', v)} />
-                                                <div className="grid grid-cols-2 gap-3">
-                                                    <InputField label={isAr ? 'المدينة' : 'Ville'} value={state.personal.city} onChange={(v) => updatePersonal('city', v)} />
-                                                    <InputField label={isAr ? 'البلد' : 'Pays'} value={state.personal.country} onChange={(v) => updatePersonal('country', v)} />
-                                                </div>
-                                                <InputField label={isAr ? 'LinkedIn' : 'LinkedIn'} value={state.personal.linkedin} onChange={(v) => updatePersonal('linkedin', v)} />
-                                                <InputField label={isAr ? 'الموقع' : 'Site web'} value={state.personal.website} onChange={(v) => updatePersonal('website', v)} />
-                                                <InputField label={isAr ? 'نبذة مختصرة' : 'Résumé'} area={true} value={state.personal.summary} onChange={(v) => updatePersonal('summary', v)} />
-                                            </div>
-
-                                            {/* Dynamic Sections */}
-                                            {Object.keys(state.sections).map(key => {
-                                                if (state.sections[key].length > 0) {
-                                                    return (
-                                                        <SectionEditor key={key} type={key} data={state.sections[key]}
-                                                            onChange={(d) => updateSection(key, d)} onDelete={() => removeSection(key)} />
-                                                    );
-                                                }
-                                                return null;
-                                            })}
-
-                                            {/* Add Section Button */}
-                                            <div className="relative group">
-                                                <button className="w-full py-3 bg-blue-50 dark:bg-slate-800 text-blue-600 rounded-xl font-bold border border-blue-200 dark:border-slate-600 hover:bg-blue-100 transition flex items-center justify-center gap-2">
-                                                    <i className="fas fa-plus-circle"></i> {text.addSection}
-                                                </button>
-                                                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-slate-800 shadow-xl rounded-xl border border-gray-100 dark:border-slate-700 p-2 hidden group-hover:block z-50">
-                                                    {SECTION_TYPES.filter(s => state.sections[s.id].length === 0).map(s => (
-                                                        <button key={s.id} onClick={() => addSection(s.id)} className="w-full text-right px-4 py-2 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg text-sm flex items-center gap-2">
-                                                            <i className={`fas ${s.icon} w-5 text-center text-gray-400`}></i> {isAr ? s.labelAr : s.labelFr}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    )}
-
-                                    {activeTab === 'design' && (
-                                        <motion.div key="design" initial={{opacity:0, x:20}} animate={{opacity:1, x:0}} exit={{opacity:0, x:-20}} className="space-y-8">
-                                            {/* Colors */}
-                                            <div>
-                                                <h3 className="font-bold mb-3 text-sm uppercase text-gray-500">{text.colors}</h3>
-                                                <div className="flex flex-wrap gap-3">
-                                                    {COLORS.map(c => (
-                                                        <button key={c} onClick={() => updateSettings('color', c)}
-                                                            className={`w-8 h-8 rounded-full transition-transform hover:scale-110 ${state.settings.color === c ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
-                                                            style={{ backgroundColor: c }} />
-                                                    ))}
-                                                    <input type="color" value={state.settings.color} onChange={(e) => updateSettings('color', e.target.value)} className="w-8 h-8 p-0 border-0 rounded-full overflow-hidden cursor-pointer" />
-                                                </div>
-                                            </div>
-
-                                            {/* Fonts */}
-                                            <div>
-                                                <h3 className="font-bold mb-3 text-sm uppercase text-gray-500">{text.fonts}</h3>
-                                                <div className="space-y-2">
-                                                    {[{id:'tajawal',name:'Tajawal'},{id:'cairo',name:'Cairo'},{id:'inter',name:'Inter'}].map(f => (
-                                                        <button key={f.id} onClick={() => updateSettings('font', f.id)}
-                                                            className={`w-full p-3 rounded-lg border text-left flex justify-between items-center ${state.settings.font === f.id ? 'border-blue-500 bg-blue-50 dark:bg-slate-800' : 'border-gray-200 dark:border-slate-700'}`}>
-                                                            <span style={{fontFamily:f.name}}>{f.name}</span>
-                                                            {state.settings.font === f.id && <i className="fas fa-check text-blue-500"></i>}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    )}
-
-                                    {activeTab === 'settings' && (
-                                        <motion.div key="settings" initial={{opacity:0, x:20}} animate={{opacity:1, x:0}} exit={{opacity:0, x:-20}} className="space-y-6">
-                                            <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
-                                                <h3 className="font-bold mb-4">{isAr ? 'إعدادات الصفحة' : 'Mise en page'}</h3>
-                                                <div className="mb-4">
-                                                    <label className="block text-xs font-bold text-gray-500 mb-2">{text.fontSize}</label>
-                                                    <div className="flex bg-gray-100 dark:bg-slate-900 rounded-lg p-1">
-                                                        {['small', 'medium', 'large'].map(size => (
-                                                            <button key={size} onClick={() => updateSettings('fontSize', size)}
-                                                                className={`flex-1 py-1 rounded-md text-sm capitalize ${state.settings.fontSize === size ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-gray-500'}`}>
-                                                                {size === 'small' ? (isAr ? 'صغير' : 'Petit') : size === 'medium' ? (isAr ? 'متوسط' : 'Moyen') : (isAr ? 'كبير' : 'Grand')}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                                <div className="mb-4">
-                                                    <label className="block text-xs font-bold text-gray-500 mb-2">{text.spacing}</label>
-                                                    <div className="flex bg-gray-100 dark:bg-slate-900 rounded-lg p-1">
-                                                        {['compact', 'normal', 'spacious'].map(s => (
-                                                            <button key={s} onClick={() => updateSettings('spacing', s)}
-                                                                className={`flex-1 py-1 rounded-md text-sm capitalize ${state.settings.spacing === s ? 'bg-white dark:bg-slate-700 shadow-sm' : 'text-gray-500'}`}>
-                                                                {s === 'compact' ? (isAr ? 'ضيق' : 'Compact') : s === 'normal' ? (isAr ? 'عادي' : 'Normal') : (isAr ? 'واسع' : 'Aéré')}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-
-                            {/* Bottom Actions */}
-                            <div className="p-4 border-t dark:border-slate-700 bg-gray-50 dark:bg-slate-800 flex gap-3">
-                                {isMobile && (
-                                    <button onClick={() => setShowMobilePreview(true)} className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold shadow-lg shadow-green-500/30 transition flex items-center justify-center gap-2">
-                                        <i className="fas fa-eye"></i> {text.preview}
-                                    </button>
-                                )}
-                                <button onClick={handleExportPDF} className={`${isMobile ? 'flex-1' : 'flex-1'} bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-500/30 transition flex items-center justify-center gap-2`}>
-                                    <i className="fas fa-file-pdf"></i> {text.download}
-                                </button>
-                                {!isMobile && (
-                                    <button onClick={() => window.print()} className="px-4 py-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl font-bold hover:bg-gray-50 transition">
-                                        <i className="fas fa-print"></i>
-                                    </button>
-                                )}
-                            </div>
+            if (currentTab === 'content') {
+                let html = `
+                    <div class="section">
+                        <div class="section-title"><i class="fas fa-user-circle"></i> ${t.personal}</div>
+                        <div class="form-row">
+                            <div class="form-group"><label class="form-label">${t.firstName}</label><input class="form-input" value="${data.personal.firstName}" oninput="updatePersonal('firstName',this.value)"></div>
+                            <div class="form-group"><label class="form-label">${t.lastName}</label><input class="form-input" value="${data.personal.lastName}" oninput="updatePersonal('lastName',this.value)"></div>
                         </div>
-
-                        {/* Right Side: Preview - Hidden on mobile */}
-                        {!isMobile && (
-                            <div className="flex-1 bg-gray-200 dark:bg-slate-950 overflow-y-auto p-8 relative flex justify-center items-start">
-                                <div className="scale-[0.6] md:scale-[0.8] lg:scale-100 origin-top transition-transform duration-300">
-                                    <ResumePreview />
-                                </div>
-                            </div>
-                        )}
+                        <div class="form-group"><label class="form-label">${t.title}</label><input class="form-input" value="${data.personal.title}" oninput="updatePersonal('title',this.value)"></div>
+                        <div class="form-group"><label class="form-label">${t.email}</label><input class="form-input" type="email" value="${data.personal.email}" oninput="updatePersonal('email',this.value)"></div>
+                        <div class="form-group"><label class="form-label">${t.phone}</label><input class="form-input" value="${data.personal.phone}" oninput="updatePersonal('phone',this.value)"></div>
+                        <div class="form-group"><label class="form-label">${t.address}</label><input class="form-input" value="${data.personal.address}" oninput="updatePersonal('address',this.value)"></div>
+                        <div class="form-row">
+                            <div class="form-group"><label class="form-label">${t.city}</label><input class="form-input" value="${data.personal.city}" oninput="updatePersonal('city',this.value)"></div>
+                            <div class="form-group"><label class="form-label">${t.country}</label><input class="form-input" value="${data.personal.country}" oninput="updatePersonal('country',this.value)"></div>
+                        </div>
+                        <div class="form-group"><label class="form-label">${t.linkedin}</label><input class="form-input" value="${data.personal.linkedin}" oninput="updatePersonal('linkedin',this.value)"></div>
+                        <div class="form-group"><label class="form-label">${t.website}</label><input class="form-input" value="${data.personal.website}" oninput="updatePersonal('website',this.value)"></div>
+                        <div class="form-group"><label class="form-label">${t.summary}</label><textarea class="form-textarea" oninput="updatePersonal('summary',this.value)">${data.personal.summary}</textarea></div>
                     </div>
+                `;
 
-                    {/* Mobile Preview Modal */}
-                    <AnimatePresence>
-                        {showMobilePreview && (
-                            <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
-                                <MobilePreviewModal 
-                                    onClose={() => setShowMobilePreview(false)}
-                                    onDownload={handleExportPDF}
-                                />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </AppContext.Provider>
-            );
-        };
+                // Render sections
+                for (const [key, items] of Object.entries(data.sections)) {
+                    if (items.length === 0) continue;
+                    const meta = SECTION_TYPES.find(s => s.id === key);
+                    html += `<div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fas ${meta.icon}"></i> ${isAr ? meta.labelAr : meta.labelFr}</div>
+                            <button class="btn-delete" onclick="removeSection('${key}')"><i class="fas fa-trash-alt"></i></button>
+                        </div>`;
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+                    items.forEach((item, idx) => {
+                        html += `<div class="item-editor">
+                            <button class="item-remove" onclick="removeItem('${key}',${idx})"><i class="fas fa-times"></i></button>`;
+                        if (key === 'skills' || key === 'hobbies') {
+                            html += `<div class="form-group"><label class="form-label">${t.name}</label><input class="form-input" value="${item.name}" oninput="updateItem('${key}',${idx},'name',this.value)"></div>`;
+                        } else if (key === 'languages') {
+                            html += `<div class="form-row">
+                                <div class="form-group"><label class="form-label">${t.name}</label><input class="form-input" value="${item.name}" oninput="updateItem('${key}',${idx},'name',this.value)"></div>
+                                <div class="form-group"><label class="form-label">${t.level}</label><input class="form-input" value="${item.level}" oninput="updateItem('${key}',${idx},'level',this.value)"></div>
+                            </div>`;
+                        } else {
+                            html += `<div class="form-row">
+                                <div class="form-group"><label class="form-label">${t.name}</label><input class="form-input" value="${item.title || ''}" oninput="updateItem('${key}',${idx},'title',this.value)"></div>
+                                <div class="form-group"><label class="form-label">${t.institution}</label><input class="form-input" value="${item.subtitle || ''}" oninput="updateItem('${key}',${idx},'subtitle',this.value)"></div>
+                            </div>
+                            <div class="form-group"><label class="form-label">${t.date}</label><input class="form-input" value="${item.date || ''}" oninput="updateItem('${key}',${idx},'date',this.value)" placeholder="2020 - 2024"></div>
+                            <div class="form-group"><label class="form-label">${t.desc}</label><textarea class="form-textarea" oninput="updateItem('${key}',${idx},'description',this.value)">${item.description || ''}</textarea></div>`;
+                        }
+                        html += `</div>`;
+                    });
+
+                    html += `<button class="btn-add" onclick="addItem('${key}')"><i class="fas fa-plus"></i> ${t.addNew}</button></div>`;
+                }
+
+                // Add section button
+                const available = SECTION_TYPES.filter(s => data.sections[s.id].length === 0);
+                html += `<div class="add-section-wrapper">
+                    <button class="btn-add"><i class="fas fa-plus-circle"></i> ${t.addSection}</button>
+                    <div class="add-section-menu">`;
+                available.forEach(s => {
+                    html += `<button class="add-section-item" onclick="addSection('${s.id}')"><i class="fas ${s.icon}"></i> ${isAr ? s.labelAr : s.labelFr}</button>`;
+                });
+                html += `</div></div>`;
+
+                area.innerHTML = html;
+
+            } else if (currentTab === 'design') {
+                let html = `<div class="section">
+                    <div class="section-title">${t.colors}</div>
+                    <div class="color-grid">`;
+                COLORS.forEach(c => {
+                    html += `<button class="color-btn ${data.settings.color === c ? 'active' : ''}" style="background:${c}" onclick="updateSetting('color','${c}')"></button>`;
+                });
+                html += `<input type="color" class="color-picker" value="${data.settings.color}" oninput="updateSetting('color',this.value)"></div></div>`;
+
+                html += `<div class="section">
+                    <div class="section-title">${t.fonts}</div>
+                    <button class="font-btn ${data.settings.font === 'tajawal' ? 'active' : ''}" onclick="updateSetting('font','tajawal')">
+                        <span style="font-family:Tajawal">Tajawal</span>
+                        ${data.settings.font === 'tajawal' ? '<i class="fas fa-check check"></i>' : ''}
+                    </button>
+                    <button class="font-btn ${data.settings.font === 'cairo' ? 'active' : ''}" onclick="updateSetting('font','cairo')">
+                        <span style="font-family:Cairo">Cairo</span>
+                        ${data.settings.font === 'cairo' ? '<i class="fas fa-check check"></i>' : ''}
+                    </button>
+                    <button class="font-btn ${data.settings.font === 'inter' ? 'active' : ''}" onclick="updateSetting('font','inter')">
+                        <span style="font-family:Inter">Inter</span>
+                        ${data.settings.font === 'inter' ? '<i class="fas fa-check check"></i>' : ''}
+                    </button>
+                </div>`;
+
+                area.innerHTML = html;
+
+            } else if (currentTab === 'settings') {
+                area.innerHTML = `
+                    <div class="section">
+                        <div class="section-title">${t.fontSize}</div>
+                        <div class="size-row">
+                            <button class="size-btn ${data.settings.fontSize === 'small' ? 'active' : ''}" onclick="updateSetting('fontSize','small')">${t.small}</button>
+                            <button class="size-btn ${data.settings.fontSize === 'medium' ? 'active' : ''}" onclick="updateSetting('fontSize','medium')">${t.medium}</button>
+                            <button class="size-btn ${data.settings.fontSize === 'large' ? 'active' : ''}" onclick="updateSetting('fontSize','large')">${t.large}</button>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <div class="section-title">${t.spacing}</div>
+                        <div class="size-row">
+                            <button class="size-btn ${data.settings.spacing === 'compact' ? 'active' : ''}" onclick="updateSetting('spacing','compact')">${t.compact}</button>
+                            <button class="size-btn ${data.settings.spacing === 'normal' ? 'active' : ''}" onclick="updateSetting('spacing','normal')">${t.normal}</button>
+                            <button class="size-btn ${data.settings.spacing === 'spacious' ? 'active' : ''}" onclick="updateSetting('spacing','spacious')">${t.spacious}</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // ===== UPDATE FUNCTIONS =====
+        function updatePersonal(field, value) {
+            data.personal[field] = value;
+            save();
+        }
+
+        function updateItem(section, index, field, value) {
+            data.sections[section][index][field] = value;
+            save();
+        }
+
+        function addItem(section) {
+            const newItem = section === 'skills' || section === 'hobbies' ? { name: '' } :
+                           section === 'languages' ? { name: '', level: '' } :
+                           { title: '', subtitle: '', date: '', description: '' };
+            data.sections[section].push(newItem);
+            save();
+            renderEditor();
+        }
+
+        function removeItem(section, index) {
+            data.sections[section].splice(index, 1);
+            save();
+            renderEditor();
+        }
+
+        function addSection(section) {
+            data.sections[section] = [{ name: '' }];
+            save();
+            renderEditor();
+        }
+
+        function removeSection(section) {
+            data.sections[section] = [];
+            save();
+            renderEditor();
+        }
+
+        function updateSetting(key, value) {
+            data.settings[key] = value;
+            save();
+            renderEditor();
+        }
+
+        function toggleLang() {
+            data.lang = data.lang === 'ar' ? 'fr' : 'ar';
+            document.getElementById('langBtn').textContent = data.lang === 'ar' ? 'FR' : 'AR';
+            document.body.dir = data.lang === 'ar' ? 'rtl' : 'ltr';
+            save();
+            renderEditor();
+        }
+
+        function toggleDark() {
+            document.body.classList.toggle('dark');
+        }
+
+        // ===== RENDER CV =====
+        function renderCV() {
+            const isAr = data.lang === 'ar';
+            const p = data.personal;
+            const s = data.sections;
+            const active = Object.keys(s).filter(k => s[k].length > 0);
+
+            const getLangLevel = (level) => ({ 'اللغة الأم': 100, 'متقدم': 85, 'متوسط': 60, 'مبتدئ': 30 }[level] || 50);
+
+            let html = `
+                <div class="cv-paper cv-creative" id="cv-paper">
+                    <div class="cv-sidebar">
+                        <div class="cv-name">${p.firstName}</div>
+                        <div class="cv-name" style="margin-top:-5px">${p.lastName}</div>
+                        <div class="cv-job">${p.title}</div>
+                        <div class="cv-section-title">${isAr ? 'معلومات الاتصال' : 'Contact'}</div>
+                        ${p.phone ? `<div class="cv-contact"><div class="cv-contact-icon"><i class="fas fa-phone"></i></div>${p.phone}</div>` : ''}
+                        ${p.email ? `<div class="cv-contact"><div class="cv-contact-icon"><i class="fas fa-envelope"></i></div>${p.email}</div>` : ''}
+                        ${p.address ? `<div class="cv-contact"><div class="cv-contact-icon"><i class="fas fa-map-marker-alt"></i></div>${p.address}</div>` : ''}
+                        ${p.linkedin ? `<div class="cv-contact"><div class="cv-contact-icon"><i class="fab fa-linkedin"></i></div>${p.linkedin}</div>` : ''}
+                        ${p.website ? `<div class="cv-contact"><div class="cv-contact-icon"><i class="fas fa-globe"></i></div>${p.website}</div>` : ''}
+                        ${active.includes('skills') ? `
+                            <div class="cv-section-title" style="margin-top:30px">${isAr ? 'المهارات' : 'Compétences'}</div>
+                            ${s.skills.map((sk, i) => `
+                                <div style="margin-bottom:10px">
+                                    <div style="font-size:12px;margin-bottom:4px">${sk.name}</div>
+                                    <div class="cv-skill-bar"><div class="cv-skill-fill" style="width:${SKILL_LEVELS[i % 8]}%"></div></div>
+                                </div>
+                            `).join('')}
+                        ` : ''}
+                        ${active.includes('languages') ? `
+                            <div class="cv-section-title" style="margin-top:30px">${isAr ? 'اللغات' : 'Langues'}</div>
+                            ${s.languages.map(l => `
+                                <div style="margin-bottom:8px">
+                                    <div style="font-size:12px">${l.name}</div>
+                                    <div style="font-size:10px;opacity:0.7">${l.level}</div>
+                                </div>
+                            `).join('')}
+                        ` : ''}
+                        ${active.includes('hobbies') ? `
+                            <div class="cv-section-title" style="margin-top:30px">${isAr ? 'الهوايات' : 'Loisirs'}</div>
+                            <div style="display:flex;flex-wrap:wrap;gap:5px">
+                                ${s.hobbies.map(h => `<span class="cv-hobby-tag">${h.name}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="cv-main">
+                        ${p.summary ? `
+                            <div style="margin-bottom:24px">
+                                <div class="cv-main-title"><div class="cv-icon-box"><i class="fas fa-user"></i></div>${isAr ? 'نبذة عني' : 'À propos'}</div>
+                                <p style="font-size:13px;line-height:1.8;color:#555">${p.summary}</p>
+                            </div>
+                        ` : ''}
+                        ${active.includes('experience') ? `
+                            <div style="margin-bottom:24px">
+                                <div class="cv-main-title"><div class="cv-icon-box"><i class="fas fa-briefcase"></i></div>${isAr ? 'الخبرات المهنية' : 'Expériences'}</div>
+                                ${s.experience.map(exp => `
+                                    <div class="cv-exp-item">
+                                        <div class="cv-exp-header">
+                                            <span class="cv-exp-title">${exp.title}</span>
+                                            <span class="cv-exp-date">${exp.date}</span>
+                                        </div>
+                                        <div class="cv-exp-company">${exp.subtitle}</div>
+                                        <div class="cv-exp-desc">${exp.description}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        ${active.includes('education') ? `
+                            <div style="margin-bottom:24px">
+                                <div class="cv-main-title"><div class="cv-icon-box"><i class="fas fa-graduation-cap"></i></div>${isAr ? 'التعليم' : 'Éducation'}</div>
+                                ${s.education.map(edu => `
+                                    <div class="cv-exp-item">
+                                        <div class="cv-exp-header">
+                                            <span class="cv-exp-title">${edu.title}</span>
+                                            <span class="cv-exp-date">${edu.date}</span>
+                                        </div>
+                                        <div class="cv-exp-company">${edu.subtitle}</div>
+                                        <div class="cv-exp-desc">${edu.description}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        ${active.includes('courses') ? `
+                            <div style="margin-bottom:24px">
+                                <div class="cv-main-title"><div class="cv-icon-box"><i class="fas fa-certificate"></i></div>${isAr ? 'الدورات' : 'Formations'}</div>
+                                ${s.courses.map(c => `
+                                    <div class="cv-exp-item">
+                                        <div class="cv-exp-header">
+                                            <span class="cv-exp-title">${c.title}</span>
+                                            <span class="cv-exp-date">${c.date}</span>
+                                        </div>
+                                        <div class="cv-exp-company">${c.subtitle}</div>
+                                        <div class="cv-exp-desc">${c.description}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        ${active.includes('projects') ? `
+                            <div>
+                                <div class="cv-main-title"><div class="cv-icon-box"><i class="fas fa-project-diagram"></i></div>${isAr ? 'المشاريع' : 'Projets'}</div>
+                                ${s.projects.map(p => `
+                                    <div class="cv-exp-item">
+                                        <div class="cv-exp-header">
+                                            <span class="cv-exp-title">${p.title}</span>
+                                            <span class="cv-exp-date">${p.date}</span>
+                                        </div>
+                                        <div class="cv-exp-company">${p.subtitle}</div>
+                                        <div class="cv-exp-desc">${p.description}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('cv-print').innerHTML = html;
+            document.getElementById('mobile-cv-print').innerHTML = html;
+        }
+
+        // ===== MOBILE PREVIEW =====
+        function showMobilePreview() {
+            document.getElementById('mobile-modal').classList.add('active');
+            // Scale the CV for mobile
+            const cv = document.querySelector('#mobile-cv-print .cv-paper');
+            if (cv) {
+                cv.style.transform = 'scale(0.4)';
+                cv.style.transformOrigin = 'top center';
+            }
+        }
+
+        function hideMobilePreview() {
+            document.getElementById('mobile-modal').classList.remove('active');
+        }
+
+        // ===== DOWNLOAD PDF =====
+        function downloadPDF() {
+            const element = document.getElementById('cv-paper');
+            const opt = {
+                margin: 0,
+                filename: `CV-${data.personal.firstName || 'Export'}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            if (typeof html2pdf !== 'undefined') {
+                html2pdf().set(opt).from(element).save();
+            } else {
+                window.print();
+            }
+        }
+
+        // ===== INIT =====
+        document.body.dir = data.lang === 'ar' ? 'rtl' : 'ltr';
+        document.getElementById('langBtn').textContent = data.lang === 'ar' ? 'FR' : 'AR';
+
+        // Check if mobile
+        const isMobile = window.innerWidth < 768;
+        if (isMobile) {
+            document.getElementById('previewBtn').style.display = 'flex';
+        }
+
+        renderEditor();
+        renderCV();
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            const mobile = window.innerWidth < 768;
+            document.getElementById('previewBtn').style.display = mobile ? 'flex' : 'none';
+        });
     </script>
 </body>
 </html>
